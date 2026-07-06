@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Orçamentos - Móveis Cristal</title>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --success-color: #2f855a;
+            --danger-color: #c53030;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #cbd5e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            color: #718096;
+            font-style: italic;
+            font-size: 13px;
+        }
+
+        .form-section {
+            margin-bottom: 18px;
+            background: #fff;
+            padding: 14px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 8px;
+            text-transform: uppercase;
+        }
+
+        .grid-3, .grid-2 {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; }
+            .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+            body { padding: 20px; }
+            .container { padding: 25px; }
+            .header h1 { font-size: 26px; }
+            .form-section { padding: 20px; margin-bottom: 25px; }
+            .section-title { font-size: 18px; }
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.inline-btn {
+            flex-direction: row;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .radio-group-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .radio-option {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 16px;
+            line-height: 1.4;
+            padding: 10px;
+            border: 1px solid #edf2f7;
+            border-radius: 6px;
+            background-color: #fcfcfc;
+        }
+
+        .radio-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .radio-option input[type="radio"], .radio-option input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .dynamic-inline-field {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-left: 32px;
+            width: calc(100% - 32px);
+        }
+
+        .dynamic-inline-field input, .dynamic-inline-field select {
+            width: 100%;
+            max-width: 140px;
+            padding: 8px;
+            font-size: 15px;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+
+        input, textarea, select {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        @media (max-width: 767px) {
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            tr { border: 1px solid #cbd5e0; border-radius: 6px; margin-bottom: 12px; padding: 8px; background-color: #f7fafc; }
+            td { border: none; position: relative; padding-left: 35%; padding-top: 6px; padding-bottom: 6px; text-align: right; }
+            td:before { position: absolute; top: 12px; left: 10px; width: 30%; padding-right: 10px; text-align: left; font-weight: bold; font-size: 14px; color: var(--primary-color); }
+            td:nth-of-type(1):before { content: "Ambiente"; }
+            td:nth-of-type(2):before { content: "Qtd"; }
+            td:nth-of-type(3):before { content: "Valor Unit."; }
+            td:nth-of-type(4):before { content: "Ação"; }
+            .col-desc, .col-qtd, .col-valor, .col-actions { width: 100% !important; }
+            .btn-remove { width: 100%; padding: 10px; }
+        }
+
+        @media (min-width: 768px) {
+            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+            th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 15px; }
+            td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; }
+            .col-desc { width: 50%; }
+            .col-qtd { width: 12%; }
+            .col-valor { width: 28%; }
+            .col-actions { width: 10%; text-align: center; }
+        }
+
+        .table-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 8px;
+            font-size: 16px;
+        }
+
+        .btn-add {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) { .btn-add { width: auto; } }
+
+        .btn-remove {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .bloco-estatico-obs {
+            background-color: #f8fafc;
+            border-left: 4px solid #4a5568;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        .bloco-estatico-obs p { margin: 6px 0; font-size: 14px; line-height: 1.4; }
+
+        .nota-informativa {
+            background-color: #fffaf0;
+            border: 1px solid #feebc8;
+            color: #c05621;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .status-ia {
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 5px;
+            color: #718096;
+        }
+
+        .status-ia.sucesso { color: var(--success-color); }
+
+        .total-container {
+            text-align: right;
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #edf2f7;
+            border-radius: 4px;
+            color: var(--primary-color);
+        }
+
+        .action-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 20px;
+        }
+
+        @media (min-width: 768px) { .action-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } }
+
+        .btn-main {
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s, opacity 0.2s;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-main:active { transform: scale(0.98); }
+        .btn-whatsapp-simple { background-color: #25D366; }
+        .btn-whatsapp-copy { background-color: #128C7E; }
+        .btn-pdf { background-color: #4a5568; }
+        .btn-clear { background-color: #e53e3e; }
+        .btn-ai { background-color: #7c3aed; margin-top: 8px; padding: 14px; }
+        .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
+
+        /* REGRAS ESTRITAS DE IMPRESSÃO (PDF COMERCIAL) */
+        @media print {
+            body { background-color: white; padding: 0; color: black; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            
+            /* Oculta painel de ações, botões, configurações e áreas manuais/de rascunho */
+            .action-panel, .btn-add, .col-actions, .btn-remove, button, 
+            .btn-add-linha, .config-section, .btn-ai, .rascunho-manual { 
+                display: none !important; 
+            }
+            
+            /* Inputs viram texto simples e limpo */
+            input, textarea, select { 
+                border: none !important; 
+                background: transparent !important; 
+                padding: 0 !important; 
+                font-size: 16px !important; 
+                color: black !important;
+                box-shadow: none !important;
+                appearance: none;
+                -webkit-appearance: none;
+            }
+            
+            textarea { min-height: auto; height: auto; resize: none; }
+            
+            /* Remove marcações e radios não selecionados */
+            input[type="radio"], input[type="checkbox"] { display: none !important; }
+            .radio-option:not(.selected-print) { display: none !important; }
+            .radio-option { border: none !important; background: transparent !important; padding: 0 !important; }
+            .radio-option.selected-print { display: block !important; }
+            
+            /* Oculta blocos vazios dinamicamente no PDF */
+            .ocultar-vazio-print:has(textarea:placeholder-shown),
+            .ocultar-vazio-print:has(textarea:empty),
+            .ocultar-vazio-print:has(input:placeholder-shown) {
+                display: none !important;
+            }
+
+            .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
+            .table-input { pointer-events: none; }
+            .total-container, .nota-informativa, .bloco-estatico-obs { background-color: #fff; border: 1px solid black; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Móveis Cristal</h1>
+        <p>Móveis Planejados & Design de Interiores</p>
+    </div>
+
+    <div class="form-section config-section" style="background-color: #f0fdf4; border: 2px dashed #bbf7d0;">
+        <div class="section-title" style="color: #166534; border-left-color: #22c55e;">⚙️ Configuração Inicial da IA (Apenas 1 vez)</div>
+        <div class="form-group">
+            <label for="apiKeyGroq" style="font-size: 14px; color: #166534; margin-bottom: 6px;">
+                Cole a sua Chave API do Groq abaixo para ativar o gerador automático:
+            </label>
+            <input type="password" id="apiKeyGroq" placeholder="Cole aqui a chave começando com gsk_..." oninput="salvarChaveAPI()" style="padding: 10px; font-size: 15px; border-color: #86efac;">
+            <div id="statusChave" class="status-ia">⚠️ Nenhuma chave detectada. Cole a chave para ativar a IA.</div>
+        </div>
+    </div>
+
+    <form id="formOrcamento">
+        <div class="form-section">
+            <div class="section-title">Informações do Orçamento</div>
+            <div class="grid-2">
+                <div class="form-group inline-btn">
+                    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                        <label for="numOrcamento">Nº do Orçamento</label>
+                        <input type="text" id="numOrcamento" readonly placeholder="Clique ao lado ➔">
+                    </div>
+                    <button type="button" class="btn-add" onclick="gerarNumeroOrcamento()" style="height: 47px;">Gerar Nº</button>
+                </div>
+                <div class="form-group">
+                    <label for="dataOrcamento">Data</label>
+                    <input type="date" id="dataOrcamento">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Dados do Cliente</div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="nomeCliente">Nome Completo</label>
+                    <input type="text" id="nomeCliente" required placeholder="Ex: João Silva">
+                </div>
+                <div class="form-group">
+                    <label for="telCliente">WhatsApp</label>
+                    <input type="tel" id="telCliente" required placeholder="Ex: 47999999999">
+                </div>
+                <div class="form-group">
+                    <label for="emailCliente">E-mail (Opcional)</label>
+                    <input type="email" id="emailCliente" placeholder="Ex: cliente@email.com">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Itens / Ambientes do Projeto</div>
+            <table id="tabelaItens">
+                <thead>
+                    <tr>
+                        <th class="col-desc">Descrição do Ambiente / Móvel</th>
+                        <th class="col-qtd">Qtd</th>
+                        <th class="col-valor">Valor Unit. (R$)</th>
+                        <th class="col-actions">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela">
+                </tbody>
+            </table>
+            <button type="button" class="btn-add btn-add-linha" onclick="adicionarLinhaItem()">+ Adicionar Outro Ambiente</button>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Logística de Entrega e Montagem</div>
+            <div class="radio-group-container">
+                <label class="radio-option" id="optFreteIncluso">
+                    <div class="radio-header">
+                        <input type="radio" name="tipoFrete" value="incluso" checked onclick="alternarCamposFrete()">
+                        <span>🚚 <strong>Incluso:</strong> Entrega e montagem completa.</span>
+                    </div>
+                </label>
+                <label class="radio-option" id="optFreteParte">
+                    <div class="radio-header">
+                        <input type="radio" name="tipoFrete" value="vlrFrete" onclick="alternarCamposFrete()">
+                        <span>🚚 <strong>Frete à parte:</strong> Valor adicional</span>
+                    </div>
+                    <div class="dynamic-inline-field">
+                        <input type="text" id="vlrFreteInput" class="moeda-input" value="0,00" disabled oninput="calcularTotal()">
+                    </div>
+                </label>
+                <label class="radio-option" id="optFreteRetirada">
+                    <div class="radio-header">
+                        <input type="radio" name="tipoFrete" value="retirada" onclick="alternarCamposFrete()">
+                        <span>🏭 <strong>Retirada na Fábrica:</strong> Responsabilidade do cliente.</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Prazo de Entrega Proposto</div>
+            <div class="form-group">
+                <label for="prazoEntregaDias">Quantidade de Dias Úteis:</label>
+                <input type="number" id="prazoEntregaDias" min="1" placeholder="Ex: 45" oninput="calcularPrazoData()">
+                <div id="resultadoPrazoTexto" style="margin-top: 8px; font-weight: bold; color: var(--primary-color); font-size: 15px;"></div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Condições de Pagamento</div>
+            <div class="radio-group-container">
+                <label class="radio-option" id="optPagVista">
+                    <div class="radio-header">
+                        <input type="radio" name="tipoPagamento" value="vista" checked onclick="alternarCamposPagamento()">
+                        <span>💳 À vista com desconto</span>
+                    </div>
+                    <div class="dynamic-inline-field">
+                        <input type="number" id="pagDescInput" value="10" min="0" max="100" oninput="calcularTotal()">% de desconto comercial.
+                    </div>
+                </label>
+                <label class="radio-option" id="optPagMontagem">
+                    <div class="radio-header">
+                        <input type="radio" name="tipoPagamento" value="entradaMontagem" onclick="alternarCamposPagamento()">
+                        <span>💳 Entrada + Saldo na Montagem</span>
+                    </div>
+                    <div class="dynamic-inline-field">
+                        <input type="number" id="pagEntradaMontagemInput" value="50" min="0" max="100" disabled oninput="calcularTotal()">% de Entrada e saldo na entrega.
+                    </div>
+                </label>
+                
+                <label class="radio-option" id="optPagParcelas">
+                    <div class="radio-header">
+                        <input type="radio" name="tipoPagamento" value="entradaParcelas" onclick="alternarCamposPagamento()">
+                        <span>💳 Entrada + Saldo no Cartão</span>
+                    </div>
+                    <div class="dynamic-inline-field">
+                        <span>Entrada de:</span>
+                        <input type="number" id="pagEntradaParcInput" value="30" min="0" max="100" disabled oninput="calcularTotal()">%
+                    </div>
+                    <div class="dynamic-inline-field">
+                        <span>Parcelamento do Saldo:</span>
+                        <select id="pagQtdParcInput" disabled onchange="calcularTotal()">
+                            <option value="1">1x (Crédito à vista)</option>
+                            <option value="2">2x</option>
+                            <option value="3">3x</option>
+                            <option value="4">4x</option>
+                            <option value="5">5x</option>
+                            <option value="6">6x</option>
+                            <option value="7">7x</option>
+                            <option value="8">8x</option>
+                            <option value="9">9x</option>
+                            <option value="10" selected>10x</option>
+                            <option value="11">11x</option>
+                            <option value="12">12x</option>
+                            <option value="0">1x (Débito)</option>
+                        </select>
+                    </div>
+                    <div class="dynamic-inline-field">
+                        <span>Regra de Taxa:</span>
+                        <select id="pagRegraJuros" disabled onchange="calcularTotal()">
+                            <option value="sem">Sem Juros (Direto de Fábrica)</option>
+                            <option value="com">Com Juros (Repasse de Taxa Maquininha)</option>
+                        </select>
+                    </div>
+                    <div id="simulacaoParcelas" style="margin-left: 32px; font-size: 14px; font-weight: bold; color: var(--secondary-color); margin-top: 5px;"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-section ocultar-vazio-print">
+            <div class="section-title">Condições Especiais de Pagamento</div>
+            <div class="form-group">
+                <textarea id="pagLivreTexto" placeholder="Caso precise descrever regras customizadas, digite aqui... Se ficar em branco, não aparecerá no PDF."></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Descritivo e Observações do Projeto</div>
+            <div class="form-group rascunho-manual" style="margin-bottom: 20px;">
+                <label for="descritivoLivreProjeto" style="color: #4a5568;">1. Anotações Manuais do Projeto (Rascunho Interno - Não vai para o PDF):</label>
+                <textarea id="descritivoLivreProjeto" placeholder="Digite aqui suas observações de rascunho..."></textarea>
+                
+                <button type="button" id="btnGerarAI" class="btn-main btn-ai" onclick="gerarDescritivoComGroq()">
+                    ✨ Gerar Descritivo Comercial por IA baseado na tabela
+                </button>
+            </div>
+
+            <div class="form-group ocultar-vazio-print" id="containerAreaIA">
+                <label for="descritivoGeradoIA" style="color: #7c3aed;">Descritivo Comercial do Projeto:</label>
+                <textarea id="descritivoGeradoIA" style="border-color: #c084fc; background-color: #faf5ff;" placeholder="O texto da IA aparecerá aqui..."></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Consultor Técnico Responsável</div>
+            <div class="radio-group-container">
+                <label class="radio-option" id="optVendedorKleiton">
+                    <div class="radio-header">
+                        <input type="radio" name="vendedorResponsavel" value="kleiton" checked>
+                        <span>👤 Kleiton Falcão</span>
+                    </div>
+                </label>
+                <label class="radio-option" id="optVendedorMauro">
+                    <div class="radio-header">
+                        <input type="radio" name="vendedorResponsavel" value="mauro">
+                        <span>👤 Mauro Falcão</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="bloco-estatico-obs">
+            <strong style="color: var(--primary-color); font-size: 15px;">📋 Observações Adicionais:</strong>
+            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defects de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
+            <p>● <strong>Entrega e Montagem:</strong> A entrega e montagem serão realizadas conforme o projeto aprovado.</p>
+            <p>● <strong>Nota:</strong> Todo o serviço será executado conforme projeto.</p>
+        </div>
+
+        <div class="nota-informativa">
+            ⚠️ <strong>Nota Técnica de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
+        </div>
+
+        <div class="total-container">
+            Total Geral: R$ <span id="valorTotalGeral">0,00</span>
+        </div>
+
+        <div class="action-panel">
+            <button type="button" class="btn-main btn-whatsapp-simple" onclick="enviarWhatsApp(false)">
+                💬 Enviar WhatsApp (Texto Manual)
+            </button>
+            <button type="button" class="btn-main btn-whatsapp-copy" onclick="enviarWhatsApp(true)">
+                ✨ Enviar WhatsApp (+ Copy IA)
+            </button>
+            <button type="button" class="btn-main btn-pdf" onclick="gerarPDF()">
+                📄 Gerar PDF do Orçamento
+            </button>
+            <button type="button" class="btn-main btn-clear" onclick="limparFormulario()">
+                ❌ Limpar Todos os Dados
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const TABELA_TAXAS = {
+        0: 0.0188, 1: 0.0446, 2: 0.0581, 3: 0.0632, 4: 0.0683,
+        5: 0.0733, 6: 0.0783, 7: 0.0834, 8: 0.0883, 9: 0.0932,
+        10: 0.0981, 11: 0.1029, 12: 0.1077
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('dataOrcamento').valueAsDate = new Date();
+        const chaveSalva = localStorage.getItem('groq_api_key');
+        if (chaveSalva && chaveSalva.trim() !== "") {
+            document.getElementById('apiKeyGroq').value = chaveSalva;
+            atualizarStatusChave(true);
+        }
+        for(let i=0; i<2; i++) { adicionarLinhaItem(); }
+        alternarCamposFrete();
+        alternarCamposPagamento();
+        
+        document.body.addEventListener('input', function(e) {
+            if(e.target.classList.contains('moeda-input')) { mascararMoeda(e.target); }
+        });
+    });
+
+    function mascararMoeda(input) {
+        let valor = input.value.replace(/\D/g, "");
+        if(valor === "") valor = "0";
+        let numero = (parseFloat(valor) / 100).toFixed(2);
+        input.value = numero.replace(".", ",").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    }
+
+    function converterTextoParaFloat(texto) {
+        if(!texto) return 0;
+        let limpo = texto.replace(/\./g, "").replace(",", ".");
+        return parseFloat(limpo) || 0;
+    }
+
+    function salvarChaveAPI() {
+        const chave = document.getElementById('apiKeyGroq').value.trim();
+        localStorage.setItem('groq_api_key', chave);
+        atualizarStatusChave(chave.length > 0);
+    }
+
+    function atualizarStatusChave(temChave) {
+        const statusEl = document.getElementById('statusChave');
+        if(statusEl) {
+            statusEl.innerText = temChave ? "✅ Chave Ativa! O gerador de IA está pronto para uso." : "⚠️ Nenhuma chave detectada. Cole a chave para ativar a IA.";
+            statusEl.className = temChave ? "status-ia sucesso" : "status-ia";
+        }
+    }
+
+    function gerarNumeroOrcamento() {
+        const agora = new Date();
+        const dia = String(agora.getDate()).padStart(2, '0');
+        const mes = String(agora.getMonth() + 1).padStart(2, '0');
+        const ano = agora.getFullYear();
+        const hora = String(agora.getHours()).padStart(2, '0');
+        const min = String(agora.getMinutes()).padStart(2, '0');
+        const seg = String(agora.getSeconds()).padStart(2, '0');
+        document.getElementById('numOrcamento').value = `CRISTAL-${dia}${mes}${ano}-${hora}${min}${seg}`;
+    }
+
+    function adicionarLinhaItem() {
+        const tbody = document.getElementById('corpoTabela');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="col-desc"><input type="text" class="table-input item-desc" placeholder="Ex: Cozinha sob medida"></td>
+            <td class="col-qtd"><input type="number" class="table-input item-qtd" value="1" min="1" oninput="calcularTotal()"></td>
+            <td class="col-valor"><input type="text" class="table-input item-valor moeda-input" value="0,00" oninput="calcularTotal()"></td>
+            <td class="col-actions"><button type="button" class="btn-remove" onclick="removerLinhaItem(this)">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+        calcularTotal();
+    }
+
+    function removerLinhaItem(botao) {
+        botao.closest('tr').remove();
+        calcularTotal();
+    }
+
+    function alternarCamposFrete() {
+        const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
+        document.getElementById('vlrFreteInput').disabled = (tipoFrete !== 'vlrFrete');
+        calcularTotal();
+    }
+
+    function alternarCamposPagamento() {
+        const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
+        document.getElementById('pagDescInput').disabled = (tipoPag !== 'vista');
+        document.getElementById('pagEntradaMontagemInput').disabled = (tipoPag !== 'entradaMontagem');
+        document.getElementById('pagEntradaParcInput').disabled = (tipoPag !== 'entradaParcelas');
+        document.getElementById('pagQtdParcInput').disabled = (tipoPag !== 'entradaParcelas');
+        document.getElementById('pagRegraJuros').disabled = (tipoPag !== 'entradaParcelas');
+        calcularTotal();
+    }
+
+    // Calcula dias úteis pulando finais de semana
+    function calcularPrazoData() {
+        const diasInput = document.getElementById('prazoEntregaDias').value;
+        const divResultado = document.getElementById('resultadoPrazoTexto');
+        
+        if(!diasInput || diasInput <= 0) {
+            divResultado.innerHTML = "";
+            return "";
+        }
+
+        let diasUteis = parseInt(diasInput);
+        let dataAtual = new Date();
+        
+        while (diasUteis > 0) {
+            dataAtual.setDate(dataAtual.getDate() + 1);
+            let diaSemana = dataAtual.getDay();
+            if (diaSemana !== 0 && diaSemana !== 6) { // Pula Domingo (0) e Sábado (6)
+                diasUteis--;
+            }
+        }
+
+        const diaF = String(dataAtual.getDate()).padStart(2, '0');
+        const mesF = String(dataAtual.getMonth() + 1).padStart(2, '0');
+        const anoF = dataAtual.getFullYear();
+        
+        const textoCompleto = `${diasInput} dias úteis após aprovação final do projeto executivo e pagamento. (Previsão aproximada: ${diaF}/${mesF}/${anoF})`;
+        divResultado.innerHTML = `⏱️ ${textoCompleto}`;
+        return textoCompleto;
+    }
+
+    function calcularTotal() {
+        let totalBruto = 0;
+        document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+            const qtd = parseFloat(linha.querySelector('.item-qtd').value) || 0;
+            const valor = converterTextoParaFloat(linha.querySelector('.item-valor').value);
+            totalBruto += (qtd * valor);
+        });
+
+        const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
+        if (tipoFrete === 'vlrFrete') {
+            totalBruto += converterTextoParaFloat(document.getElementById('vlrFreteInput').value);
+        }
+
+        // Lógica de Modificação de preço com base nas condições
+        const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
+        const divSimulacao = document.getElementById('simulacaoParcelas');
+        let totalFinal = totalBruto;
+
+        if (tipoPag === 'vista') {
+            const desc = parseFloat(document.getElementById('pagDescInput').value) || 0;
+            totalFinal = totalBruto * (1 - (desc / 100));
+            divSimulacao.innerHTML = "";
+        } 
+        else if (tipoPag === 'entradaParcelas' && totalBruto > 0) {
+            const pctEntrada = parseFloat(document.getElementById('pagEntradaParcInput').value) || 0;
+            const qtdParc = parseInt(document.getElementById('pagQtdParcInput').value);
+            const regraJuros = document.getElementById('pagRegraJuros').value;
+            
+            const vlrEntrada = totalBruto * (pctEntrada / 100);
+            let vlrSaldoOriginal = totalBruto - vlrEntrada;
+            let vlrSaldoComJuros = vlrSaldoOriginal;
+            
+            if (regraJuros === 'com' && TABELA_TAXAS[qtdParc] !== undefined) {
+                vlrSaldoComJuros = vlrSaldoOriginal * (1 + TABELA_TAXAS[qtdParc]);
+                // O TOTAL GERAL É ATUALIZADO COM OS JUROS DO CARTÃO EMBUTIDOS
+                totalFinal = vlrEntrada + vlrSaldoComJuros;
+            }
+            
+            const vlrParcela = vlrSaldoComJuros / (qtdParc === 0 ? 1 : qtdParc);
+            const rotuloParc = qtdParc === 0 ? "Débito" : `${qtdParc}x`;
+            
+            divSimulacao.innerHTML = `💸 Resumo: Entrada: R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} ${regraJuros === 'com' ? '(Juros inclusos no Total)' : '(Sem Juros)'}`;
+        } else {
+            divSimulacao.innerHTML = "";
+        }
+
+        document.getElementById('valorTotalGeral').innerText = totalFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    async function gerarDescritivoComGroq() {
+        const apiKey = document.getElementById('apiKeyGroq').value.trim();
+        if (!apiKey) {
+            alert("Por favor, insira a chave do Groq no campo verde lá no topo.");
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            return;
+        }
+
+        let itensLista = [];
+        document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+            const desc = linha.querySelector('.item-desc').value.trim();
+            const qtd = linha.querySelector('.item-qtd').value;
+            if(desc) itensLista.push(`- ${qtd}x ${desc}`);
+        });
+
+        if (itensLista.length === 0) {
+            alert("Insira itens na tabela primeiro.");
+            return;
+        }
+
+        const btn = document.getElementById('btnGerarAI');
+        btn.disabled = true;
+        btn.innerText = "⏳ Escrevendo...";
+
+        const promptEnvio = `Você é um engenheiro de produção e designer de interiores sênior da Móveis Cristal. Itens do cliente: ${itensLista.join(' | ')}. Escreva um descritivo técnico comercial elegante, focado em alto padrão, durabilidade, uso de MDF de excelente qualidade e precisão de acabamento. Seja direto, profissional e gere o texto em formato corrido. Não envie introduções nem saudações.`;
+
+        try {
+            const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "llama3-8b-8192",
+                    messages: [{ role: "user", content: promptEnvio }],
+                    temperature: 0.6
+                })
+            });
+
+            if(!resposta.ok) throw new Error("Erro de resposta da API");
+            const dados = await resposta.json();
+            document.getElementById('descritivoGeradoIA').value = dados.choices[0].message.content.trim();
+        } catch (erro) {
+            console.error(erro);
+            alert("Erro de conexão com o Groq. O erro desaparecerá assim que hospedar o projeto no GitHub Pages!");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "✨ Gerar Descritivo Comercial por IA baseado na tabela";
+        }
+    }
+
+    function obterTextoLogistica() {
+        const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
+        if (tipoFrete === 'incluso') return "Entrega e montagem técnica sob responsabilidade da Móveis Cristal inclusa no projeto.";
+        if (tipoFrete === 'vlrFrete') return `Logística e montagem sob taxa adicional de R$ ${document.getElementById('vlrFreteInput').value}.`;
+        return "Retirada direta na fábrica e montagem por conta e responsabilidade do cliente.";
+    }
+
+    function obterTextoPagamento() {
+        const totalFinal = converterTextoParaFloat(document.getElementById('valorTotalGeral').innerText);
+        const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
+        
+        if (tipoPag === 'vista') {
+            return `À vista com ${document.getElementById('pagDescInput').value}% de desconto comercial de fábrica.`;
+        }
+        if (tipoPag === 'entradaMontagem') {
+            return `Entrada estruturada de ${document.getElementById('pagEntradaMontagemInput').value}% + Quitação do saldo restante no ato da montagem final.`;
+        }
+        if (tipoPag === 'entradaParcelas') {
+            const pctEntrada = parseFloat(document.getElementById('pagEntradaParcInput').value) || 0;
+            const qtdParc = parseInt(document.getElementById('pagQtdParcInput').value);
+            const regraJuros = document.getElementById('pagRegraJuros').value;
+            
+            const vlrEntrada = totalFinal * (pctEntrada / 100);
+            const vlrSaldo = totalFinal - vlrEntrada;
+            const vlrParcela = vlrSaldo / (qtdParc === 0 ? 1 : qtdParc);
+            const rotuloParc = qtdParc === 0 ? "Débito" : `${qtdParc}x`;
+            const rotuloJuros = regraJuros === 'com' ? "com taxas da maquininha inclusas" : "sem juros direto de fábrica";
+            
+            return `Entrada de R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} (${pctEntrada}%) + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} no cartão (${rotuloJuros}).`;
+        }
+        return "Condição customizada acertada previamente.";
+    }
+
+    function obterAssinaturaVendedor() {
+        const vend = document.querySelector('input[name="vendedorResponsavel"]:checked').value;
+        return vend === 'kleiton' ? "Atenciosamente,\n*Kleiton Falcão | Móveis Cristal*" : "Atenciosamente,\n*Mauro Falcão | Móveis Cristal*";
+    }
+
+    function enviarWhatsApp(usarCopyIA) {
+        const nome = document.getElementById('nomeCliente').value.trim();
+        const telefone = document.getElementById('telCliente').value.trim();
+        const numero = document.getElementById('numOrcamento').value || 'Pendente';
+        const total = document.getElementById('valorTotalGeral').innerText;
+        const prazo = calcularPrazoData();
+        const condicaoEspecial = document.getElementById('pagLivreTexto').value.trim();
+        
+        const descritivoManual = document.getElementById('descritivoLivreProjeto').value.trim();
+        const descritivoIA = document.getElementById('descritivoGeradoIA').value.trim();
+
+        if (!nome || !telefone) {
+            alert("Preencha Nome e WhatsApp do cliente.");
+            return;
+        }
+
+        let linhasItens = [];
+        document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+            const desc = App = linha.querySelector('.item-desc').value.trim();
+            const qtd = parseInt(linha.querySelector('.item-qtd').value) || 0;
+            const valor = converterTextoParaFloat(linha.querySelector('.item-valor').value);
+            if (desc !== "") linhasItens.push({ desc, qtd, sub: (qtd * valor) });
+        });
+
+        let msg = "";
+
+        if (!usarCopyIA) {
+            msg += `Olá, *${nome}*! Segue o descritivo técnico comercial do seu orçamento na *Móveis Cristal*:\n\n`;
+            msg += `📋 *Orçamento nº:* ${numero}\n`;
+            msg += `-------------------------------------------\n\n`;
+            linhasItens.forEach(i => {
+                msg += `📐 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
+            });
+            if(descritivoManual) msg += `📝 *Observações do Projeto:*\n${descritivoManual}\n\n`;
+        } else {
+            msg += `Olá, *${nome}*! ✨ Tudo bem?\n\n`;
+            msg += `O projeto dos seus sonhos já está processado para a nossa fábrica. Desenvolvemos uma proposta de alta performance transformando cada milímetro do seu espaço em sofisticação, engenharia ergonômica e alta durabilidade.\n\n`;
+            msg += `🏗️ *Móveis a serem Industrializados (Móveis Cristal):*\n`;
+            msg += `-------------------------------------------\n`;
+            linhasItens.forEach(i => {
+                msg += `💎 *${i.desc}*\n• Engenharia técnica automatizada de alta precisão.\n• Unidades: ${i.qtd} | Total: R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}\n\n`;
+            });
+            if(descritivoIA) msg += `📝 *Especificações Técnicas de Fábrica:*\n${descritivoIA}\n\n`;
+        }
+
+        msg += `-------------------------------------------\n`;
+        msg += `🚚 *Logística e Execução:* ${obterTextoLogistica()}\n`;
+        if(prazo) msg += `⏳ *Prazo de Entrega:* ${prazo}\n`;
+        msg += `💳 *Condição Proposta:* ${obterTextoPagamento()}\n`;
+        if(condicaoEspecial) msg += `📝 *Condições Especiais:* ${condicaoEspecial}\n`;
+        msg += `🔥 *INVESTIMENTO TOTAL:* R$ ${total}\n\n`;
+
+        msg += `📋 *Observações Adicionais:*\n• *Garantia:* Oferecemos 2 anos de garantia contra defeitos de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.\n• *Entrega e Montagem:* A entrega e montagem serão realizadas conforme o projeto aprovado.\n• *Nota:* Todo o serviço será executado conforme projeto.\n\n`;
+        msg += `⚠️ *Aviso Importante:* Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior implicará na modificação imediata dos valores.\n\n`;
+        msg += `${obterAssinaturaVendedor()}`;
+
+        window.open(`https://api.whatsapp.com/send?phone=55${telefone.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    function marcarClassesImpressao() {
+        document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected-print'));
+        const freteMarcado = document.querySelector('input[name="tipoFrete"]:checked');
+        if(freteMarcado) freteMarcado.closest('.radio-option').classList.add('selected-print');
+        const pagMarcado = document.querySelector('input[name="tipoPagamento"]:checked');
+        if(pagMarcado) pagMarcado.closest('.radio-option').classList.add('selected-print');
+        const vendMarcado = document.querySelector('input[name="vendedorResponsavel"]:checked');
+        if(vendMarcado) vendMarcado.closest('.radio-option').classList.add('selected-print');
+    }
+
+    function gerarPDF() {
+        if (!document.getElementById('nomeCliente').value.trim()) {
+            alert("Preencha ao menos o nome do cliente.");
+            return;
+        }
+        marcarClassesImpressao();
+        window.print();
+    }
+
+    function limparFormulario() {
+        if(confirm("Deseja realmente limpar todos os dados?")) {
+            document.getElementById('formOrcamento').reset();
+            document.getElementById('descritivoGeradoIA').value = '';
+            document.getElementById('simulacaoParcelas').innerHTML = '';
+            document.getElementById('resultadoPrazoTexto').innerHTML = '';
+            const tbody = document.getElementById('corpoTabela');
+            tbody.innerHTML = '';
+            for(let i=0; i<2; i++) { adicionarLinhaItem(); }
+            alternarCamposFrete();
+            alternarCamposPagamento();
+        }
+    }
+</script>
+</body>
+</html>
