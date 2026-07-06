@@ -313,7 +313,7 @@
             body { background-color: white; padding: 0; color: black; }
             .container { box-shadow: none; padding: 0; max-width: 100%; }
             .action-panel, .btn-add, .col-actions, .btn-remove, button, 
-            .btn-add-linha, .config-section, .btn-ai, .rascunho-manual { 
+            .btn-add-linha, .config-section, .btn-ai, .rascunho-manual-container { 
                 display: none !important; 
             }
             input, textarea, select { 
@@ -326,7 +326,7 @@
                 appearance: none;
                 -webkit-appearance: none;
             }
-            textarea { min-height: auto; height: auto; resize: none; }
+            textarea { min-height: auto; height: auto; resize: none; overflow: hidden; }
             input[type="radio"], input[type="checkbox"] { display: none !important; }
             .radio-option:not(.selected-print) { display: none !important; }
             .radio-option { border: none !important; background: transparent !important; padding: 0 !important; }
@@ -339,6 +339,17 @@
             .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
             .table-input { pointer-events: none; }
             .total-container, .nota-informativa, .bloco-estatico-obs { background-color: #fff; border: 1px solid black; color: black; }
+            
+            /* Forçar visibilidade correta dos textos de descritivo no PDF */
+            #descritivoGeradoIA, #descritivoLivreProjetoExibicaoPrint {
+                background-color: transparent !important;
+                border: none !important;
+                color: #000 !important;
+                padding: 0 !important;
+                font-size: 16px !important;
+                width: 100% !important;
+                display: block !important;
+            }
         }
     </style>
 </head>
@@ -520,18 +531,24 @@
 
         <div class="form-section">
             <div class="section-title">Descritivo e Observações do Projeto</div>
-            <div class="form-group rascunho-manual" style="margin-bottom: 20px;">
-                <label for="descritivoLivreProjeto" style="color: #4a5568;">1. Anotações Manuais do Projeto (Rascunho Interno - Não vai para o PDF):</label>
-                <textarea id="descritivoLivreProjeto" placeholder="Digite aqui suas observações de rascunho..."></textarea>
+            
+            <div class="form-group rascunho-manual-container" style="margin-bottom: 20px;">
+                <label for="descritivoLivreProjeto" style="color: #4a5568;">1. Anotações Manuais do Projeto (Informações Reais da Fábrica):</label>
+                <textarea id="descritivoLivreProjeto" placeholder="Digite aqui o que está incluso, se é MDF ou MDP, tamanhos, cores e dados cruciais do projeto... A IA usará estritamente isso."></textarea>
                 
                 <button type="button" id="btnGerarAI" class="btn-main btn-ai" onclick="gerarDescritivoComGroq()">
-                    ✨ Gerar Descritivo Comercial por IA baseado na tabela
+                    ✨ Organizar e Refinar Descritivo com IA baseado nas Anotações
                 </button>
             </div>
 
-            <div class="form-group ocultar-vazio-print" id="containerAreaIA">
-                <label for="descritivoGeradoIA" style="color: #7c3aed;">Descritivo Comercial do Projeto:</label>
-                <textarea id="descritivoGeradoIA" style="border-color: #c084fc; background-color: #faf5ff;" placeholder="O texto da IA aparecerá aqui..."></textarea>
+            <div class="form-group" id="containerAreaManualPrint" style="display: none; margin-bottom: 15px;">
+                <label style="color: var(--primary-color); font-weight: bold;">Especificações Técnicas do Projeto:</label>
+                <textarea id="descritivoLivreProjetoExibicaoPrint" readonly></textarea>
+            </div>
+
+            <div class="form-group" id="containerAreaIA">
+                <label for="descritivoGeradoIA" style="color: #7c3aed; font-weight: bold;">Descritivo Comercial do Projeto (Refinado por IA):</label>
+                <textarea id="descritivoGeradoIA" style="border-color: #c084fc; background-color: #faf5ff;" placeholder="O texto estruturado pela IA aparecerá aqui após clicar no botão roxo..."></textarea>
             </div>
         </div>
 
@@ -556,7 +573,7 @@
         <div class="bloco-estatico-obs">
             <strong style="color: var(--primary-color); font-size: 15px;">📋 Observações Adicionais:</strong>
             <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defeitos de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
-            <p>● <strong>Entrega e Montagem:</strong> A entrega e montagem serão realizadas conforme o projeto aprovado.</p>
+            <p>• <strong>Entrega e Montagem:</strong> A entrega e montagem serão realizadas conforme o projeto aprovado.</p>
             <p>● <strong>Nota:</strong> Todo o serviço será executado conforme projeto.</p>
         </div>
 
@@ -606,7 +623,17 @@
         document.body.addEventListener('input', function(e) {
             if(e.target.classList.contains('moeda-input')) { mascararMoeda(e.target); }
         });
+     head.addEventListener('input', function() { ajustarAlturaTextareas(); });
     });
+
+    function ajustarAlturaTextareas() {
+        document.querySelectorAll('textarea').forEach(tx => {
+            if(tx.id === 'descritivoGeradoIA' || tx.id === 'descritivoLivreProjetoExibicaoPrint') {
+                tx.style.height = 'auto';
+                tx.style.height = tx.scrollHeight + 'px';
+            }
+        });
+    }
 
     function mascararMoeda(input) {
         let valor = input.value.replace(/\D/g, "");
@@ -764,23 +791,34 @@
             return;
         }
 
+        const anotacoesManuais = document.getElementById('descritivoLivreProjeto').value.trim();
+        if (!anotacoesManuais) {
+            alert("Por favor, digite as informações do projeto nas 'Anotações Manuais' primeiro. A IA precisa ler os seus dados para organizá-los.");
+            return;
+        }
+
         let itensLista = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
             const desc = linha.querySelector('.item-desc').value.trim();
             const qtd = linha.querySelector('.item-qtd').value;
-            if(desc) itensLista.push(`- ${qtd}x ${desc}`);
+            if(desc) itensLista.push(`${qtd}x ${desc}`);
         });
-
-        if (itensLista.length === 0) {
-            alert("Insira itens na tabela primeiro.");
-            return;
-        }
 
         const btn = document.getElementById('btnGerarAI');
         btn.disabled = true;
-        btn.innerText = "⏳ Escrevendo...";
+        btn.innerText = "⏳ Estruturando e Polindo...";
 
-        const promptEnvio = `Você é um engenheiro de produção e designer de interiores sênior da Móveis Cristal. Itens do cliente: ${itensLista.join(' | ')}. Escreva um descritivo técnico comercial elegante, focado em alto padrão, durabilidade, uso de MDF de excelente qualidade e precisão de acabamento. Seja direto, profissional e gere o texto em formato corrido. Não envie introduções nem saudações.`;
+        const promptEnvio = `Você é o assistente técnico de redação da Móveis Cristal.
+Sua única tarefa é ler as "Anotações Manuais" fornecidas pelo projetista e organizá-las de forma bonita, limpa, estruturada e profissional para o cliente.
+
+DADOS REAIS DO PROJETO (Use APENAS estes dados para a parte técnica):
+Ambientes em tabela: ${itensLista.join(' | ')}
+Anotações do Projetista: ${anotacoesManuais}
+
+CRITÉRIOS RIGOROSOS:
+1. Você está PROIBIDO de inventar ou deduzir informações. Se não estiver escrito nas Anotações se é MDF ou MDP, qual o tamanho, a cor ou o que está incluso, você NÃO deve colocar nada disso da sua cabeça. Baseie-se estritamente na informação preenchida.
+2. Você PODE (e deve) adicionar uma linguagem elegante e comercial elogiando o projeto de forma genérica, citando: elegância, durabilidade, materiais de altíssima qualidade, fabricação com engenharia de precisão e cuidado para garantir um acabamento impecável, além de ressaltar a confiança e tradição da Móveis Cristal com anos de experiência no mercado entregando excelência.
+3. Organize o texto final usando parágrafos limpos ou tópicos organizados se facilitar a leitura. Gere apenas o texto corrido final direto. Não envie saudações, introduções ("Aqui está o seu texto:") ou notas de rodapé.`;
 
         try {
             const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -792,7 +830,7 @@
                 body: JSON.stringify({
                     model: "llama-3.1-8b-instant",
                     messages: [{ role: "user", content: promptEnvio }],
-                    temperature: 0.5
+                    temperature: 0.3
                 })
             });
 
@@ -803,13 +841,16 @@
             }
 
             const dados = await resposta.json();
-            document.getElementById('descritivoGeradoIA').value = dados.choices[0].message.content.trim();
+            const textoGerado = dados.choices[0].message.content.trim();
+            
+            document.getElementById('descritivoGeradoIA').value = textoGerado;
+            setTimeout(ajustarAlturaTextareas, 200);
         } catch (erro) {
             console.error(erro);
-            alert(`Falha no Groq:\n${erro.message}\n\nVerifique se sua chave API está correta e ativa.`);
+            alert(`Falha no Groq:\n${erro.message}\n\nVerifique sua chave.`);
         } finally {
             btn.disabled = false;
-            btn.innerText = "✨ Gerar Descritivo Comercial por IA baseado na tabela";
+            btn.innerText = "✨ Organizar e Refinar Descritivo com IA baseado nas Anotações";
         }
     }
 
@@ -877,6 +918,7 @@
 
         let msg = "";
 
+        // Regra de Fluxo de Texto Dinâmico baseada no preenchimento
         if (!usarCopyIA) {
             msg += `Olá, *${nome}*! Segue o descritivo técnico comercial do seu orçamento na *Móveis Cristal*:\n\n`;
             msg += `📋 *Orçamento nº:* ${numero}\n`;
@@ -884,16 +926,28 @@
             linhasItens.forEach(i => {
                 msg += `📐 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
             });
-            if(descritivoManual) msg += `📝 *Observações do Projeto:*\n${descritivoManual}\n\n`;
+            
+            // Se o campo da IA tiver texto, ele vai no WhatsApp Manual, senão usa o rascunho puramente manual
+            if(descritivoIA) {
+                msg += `📝 *Especificações Técnicas:*\n${descritivoIA}\n\n`;
+            } else if(descritivoManual) {
+                msg += `📝 *Especificações Técnicas:*\n${descritivoManual}\n\n`;
+            }
         } else {
             msg += `Olá, *${nome}*! ✨ Tudo bem?\n\n`;
-            msg += `O projeto dos seus sonhos já está processado para a nossa fábrica. Desenvolvemos uma proposta de alta performance transformando cada milímetro do seu espaço em sofisticação, engenharia ergonômica e alta durabilidade.\n\n`;
+            msg += `O projeto dos seus sonhos já está processado para a nossa engenharia de fábrica. Desenvolvemos uma proposta de alta performance focada em elegância, durabilidade e máxima sofisticação para o seu ambiente.\n\n`;
             msg += `🏗️ *Móveis a serem Industrializados (Móveis Cristal):*\n`;
             msg += `-------------------------------------------\n`;
             linhasItens.forEach(i => {
                 msg += `💎 *${i.desc}*\n• Engenharia técnica automatizada de alta precisão.\n• Unidades: ${i.qtd} | Total: R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}\n\n`;
             });
-            if(descritivoIA) msg += `📝 *Especificações Técnicas de Fábrica:*\n${descritivoIA}\n\n`;
+            
+            // Prioriza o texto Lapidado da IA se existir, se não rebaixa para o manual estruturado
+            if(descritivoIA) {
+                msg += `📝 *Especificações de Fábrica (Refinado por IA):*\n${descritivoIA}\n\n`;
+            } else if(descritivoManual) {
+                msg += `📝 *Especificações de Fábrica:*\n${descritivoManual}\n\n`;
+            }
         }
 
         msg += `-------------------------------------------\n`;
@@ -918,6 +972,30 @@
         if(pagMarcado) pagMarcado.closest('.radio-option').classList.add('selected-print');
         const vendMarcado = document.querySelector('input[name="vendedorResponsavel"]:checked');
         if(vendMarcado) vendMarcado.closest('.radio-option').classList.add('selected-print');
+
+        const descManual = document.getElementById('descritivoLivreProjeto').value.trim();
+        const descIA = document.getElementById('descritivoGeradoIA').value.trim();
+        
+        const containerManualPrint = document.getElementById('containerAreaManualPrint');
+        const containerIAPrint = document.getElementById('containerAreaIA');
+
+        // REGRA DE IMPRESSÃO DINÂMICA
+        if (descIA !== "") {
+            // Se a IA gerou texto, mostra apenas o da IA e oculta o manual do PDF
+            containerIAPrint.style.display = 'block';
+            containerManualPrint.style.display = 'none';
+        } else if (descManual !== "") {
+            // Se a IA estiver vazia mas tem texto manual, espelha o manual no campo limpo de impressão e oculta o bloco da IA
+            document.getElementById('descritivoLivreProjetoExibicaoPrint').value = descManual;
+            containerManualPrint.style.display = 'block';
+            containerIAPrint.style.display = 'none';
+        } else {
+            // Se ambos estiverem vazios, não imprime nenhum dos dois blocos
+            containerManualPrint.style.display = 'none';
+            containerIAPrint.style.display = 'none';
+        }
+        
+        ajustarAlturaTextareas();
     }
 
     function gerarPDF() {
@@ -926,7 +1004,8 @@
             return;
         }
         marcarClassesImpressao();
-        window.print();
+        // Pequena pausa para garantir o recálculo de altura das caixas de texto antes de abrir a janela do sistema
+        setTimeout(() => { window.print(); }, 300);
     }
 
     function limparFormulario() {
@@ -940,6 +1019,8 @@
             for(let i=0; i<2; i++) { adicionarLinhaItem(); }
             alternarCamposFrete();
             alternarCamposPagamento();
+            document.getElementById('containerAreaManualPrint').style.display = 'none';
+            document.getElementById('containerAreaIA').style.display = 'block';
         }
     }
 </script>
