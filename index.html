@@ -577,7 +577,7 @@
         </div>
 
         <div class="nota-informativa">
-            ⚠️ <strong>Nota Técnico de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
+            ⚠️ <strong>Nota Técnica de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
         </div>
 
         <div class="total-container">
@@ -643,7 +643,7 @@
 
     function converterTextoParaFloat(texto) {
         if(!texto) return 0;
-        let limpo = text = texto.replace(/\./g, "").replace(",", ".");
+        let limpo = texto.replace(/\./g, "").replace(",", ".");
         return parseFloat(limpo) || 0;
     }
 
@@ -814,10 +814,10 @@ DADOS REAIS DO PROJETO (Use APENAS estes dados para a parte técnica):
 Ambientes em tabela: ${itensLista.join(' | ')}
 Anotações do Projetista: ${anotacoesManuais}
 
-CRITÉRIOS RIGOROSOS:
-1. Você está PROIBIDO de inventar ou deduzir informações. Se não estiver escrito nas Anotações se é MDF ou MDP, qual o tamanho, a cor ou o que está incluso, você NÃO deve colocar nada disso da sua cabeça. Baseie-se estritamente na informação preenchida.
-2. Você PODE (e deve) adicionar uma linguagem elegante e comercial elogiando o projeto de forma genérica, citando: elegância, durabilidade, materiais de altíssima qualidade, fabricação com engenharia de precisão e cuidado para garantir um acabamento impecável, além de ressaltar a confiança e tradição da Móveis Cristal com anos de experiência no mercado entregando excelência.
-3. Organize o texto final usando parágrafos limpos ou tópicos organizados se facilitar a leitura. Gere apenas o texto corrido final direto. Não envie saudações, introduções ("Aqui está o seu texto:") ou notas de rodapé.`;
+CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
+1. Você está PROIBIDO de inventar ou deduzir informações técnicas. Se não estiver escrito se é MDF ou MDP, tamanho ou cor, você NÃO deve inventar.
+2. Você PODE (e deve) adicionar uma linguagem elegante e comercial elogiando o projeto de forma genérica (durabilidade, materiais excelentes, engenharia técnica, tradição de mercado).
+3. Use a sintaxe correta de texto do WhatsApp: Use asteriscos para *Negritos* em títulos e palavras cruciais. Nunca envie saudações, introduções ("Aqui está o seu texto:") ou notas de rodapé. Devolva apenas o texto limpo direto, formatado em parágrafos ou listas de marcadores com hífen (-) ou emoji.`;
 
         try {
             const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -922,29 +922,30 @@ CRITÉRIOS RIGOROSOS:
         let msg = "";
 
         if (!usarCopyIA) {
+            // REGRA 1: BOTÃO MANUAL - Usa estritamente o texto manual puro
             msg += `Olá, *${nome}*! Segue o descritivo técnico comercial do seu orçamento na *Móveis Cristal*:\n\n`;
             msg += `📋 *Orçamento nº:* ${numero}\n`;
             msg += `-------------------------------------------\n\n`;
             linhasItens.forEach(i => {
-                msg += `📐 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
+                msg += `💎 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
             });
             
-            if(descritivoIA) {
-                msg += `📝 *Especificações Técnicas:*\n${descritivoIA}\n\n`;
-            } else if(descritivoManual) {
+            if(descritivoManual) {
                 msg += `📝 *Especificações Técnicas:*\n${descritivoManual}\n\n`;
             }
         } else {
+            // REGRA 2: BOTÃO COPY + IA - Apresentação refinada com número do orçamento e descritivo IA
             msg += `Olá, *${nome}*! ✨ Tudo bem?\n\n`;
             msg += `O projeto dos seus sonhos já está processado para a nossa engenharia de fábrica. Desenvolvemos uma proposta de alta performance focada em elegância, durabilidade e máxima sofisticação para o seu ambiente.\n\n`;
+            msg += `📋 *Orçamento nº:* ${numero}\n`;
             msg += `🏗️ *Móveis a serem Industrializados (Móveis Cristal):*\n`;
-            msg += `-------------------------------------------\n`;
+            msg += `-------------------------------------------\n\n`;
             linhasItens.forEach(i => {
-                msg += `💎 *${i.desc}*\n• Engenharia técnica automatizada de alta precisão.\n• Unidades: ${i.qtd} | Total: R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}\n\n`;
+                msg += `💎 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
             });
             
             if(descritivoIA) {
-                msg += `📝 *Especificações de Fábrica (Refinado por IA):*\n${descritivoIA}\n\n`;
+                msg += `📝 *Especificações de Fábrica:*\n${descritivoIA}\n\n`;
             } else if(descritivoManual) {
                 msg += `📝 *Especificações de Fábrica:*\n${descritivoManual}\n\n`;
             }
@@ -979,6 +980,7 @@ CRITÉRIOS RIGOROSOS:
         const containerManualPrint = document.getElementById('containerAreaManualPrint');
         const containerIAPrint = document.getElementById('containerAreaIA');
 
+        // REGRA DO PDF: Continua usando o descritivo de IA se ele estiver preenchido
         if (descIA !== "") {
             containerIAPrint.style.display = 'block';
             containerManualPrint.style.display = 'none';
