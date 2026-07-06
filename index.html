@@ -309,18 +309,13 @@
         .btn-ai { background-color: #7c3aed; margin-top: 8px; padding: 14px; }
         .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
 
-        /* REGRAS ESTRITAS DE IMPRESSÃO (PDF COMERCIAL) */
         @media print {
             body { background-color: white; padding: 0; color: black; }
             .container { box-shadow: none; padding: 0; max-width: 100%; }
-            
-            /* Oculta painel de ações, botões, configurações e áreas manuais/de rascunho */
             .action-panel, .btn-add, .col-actions, .btn-remove, button, 
             .btn-add-linha, .config-section, .btn-ai, .rascunho-manual { 
                 display: none !important; 
             }
-            
-            /* Inputs viram texto simples e limpo */
             input, textarea, select { 
                 border: none !important; 
                 background: transparent !important; 
@@ -331,22 +326,16 @@
                 appearance: none;
                 -webkit-appearance: none;
             }
-            
             textarea { min-height: auto; height: auto; resize: none; }
-            
-            /* Remove marcações e radios não selecionados */
             input[type="radio"], input[type="checkbox"] { display: none !important; }
             .radio-option:not(.selected-print) { display: none !important; }
             .radio-option { border: none !important; background: transparent !important; padding: 0 !important; }
             .radio-option.selected-print { display: block !important; }
-            
-            /* Oculta blocos vazios dinamicamente no PDF */
             .ocultar-vazio-print:has(textarea:placeholder-shown),
             .ocultar-vazio-print:has(textarea:empty),
             .ocultar-vazio-print:has(input:placeholder-shown) {
                 display: none !important;
             }
-
             .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
             .table-input { pointer-events: none; }
             .total-container, .nota-informativa, .bloco-estatico-obs { background-color: #fff; border: 1px solid black; color: black; }
@@ -566,7 +555,7 @@
 
         <div class="bloco-estatico-obs">
             <strong style="color: var(--primary-color); font-size: 15px;">📋 Observações Adicionais:</strong>
-            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defects de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
+            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defeitos de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
             <p>● <strong>Entrega e Montagem:</strong> A entrega e montagem serão realizadas conforme o projeto aprovado.</p>
             <p>● <strong>Nota:</strong> Todo o serviço será executado conforme projeto.</p>
         </div>
@@ -691,7 +680,6 @@
         calcularTotal();
     }
 
-    // Calcula dias úteis pulando finais de semana
     function calcularPrazoData() {
         const diasInput = document.getElementById('prazoEntregaDias').value;
         const divResultado = document.getElementById('resultadoPrazoTexto');
@@ -707,7 +695,7 @@
         while (diasUteis > 0) {
             dataAtual.setDate(dataAtual.getDate() + 1);
             let diaSemana = dataAtual.getDay();
-            if (diaSemana !== 0 && diaSemana !== 6) { // Pula Domingo (0) e Sábado (6)
+            if (diaSemana !== 0 && diaSemana !== 6) {
                 diasUteis--;
             }
         }
@@ -734,7 +722,6 @@
             totalBruto += converterTextoParaFloat(document.getElementById('vlrFreteInput').value);
         }
 
-        // Lógica de Modificação de preço com base nas condições
         const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
         const divSimulacao = document.getElementById('simulacaoParcelas');
         let totalFinal = totalBruto;
@@ -755,7 +742,6 @@
             
             if (regraJuros === 'com' && TABELA_TAXAS[qtdParc] !== undefined) {
                 vlrSaldoComJuros = vlrSaldoOriginal * (1 + TABELA_TAXAS[qtdParc]);
-                // O TOTAL GERAL É ATUALIZADO COM OS JUROS DO CARTÃO EMBUTIDOS
                 totalFinal = vlrEntrada + vlrSaldoComJuros;
             }
             
@@ -804,25 +790,30 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "llama3-8b-8192",
+                    model: "llama-3.1-8b-instant",
                     messages: [{ role: "user", content: promptEnvio }],
-                    temperature: 0.6
+                    temperature: 0.5
                 })
             });
 
-            if(!resposta.ok) throw new Error("Erro de resposta da API");
+            if (!resposta.ok) {
+                const dadosErro = await resposta.json().catch(() => ({}));
+                const mensagemErroServidor = dadosErro?.error?.message || `Status HTTP: ${resposta.status}`;
+                throw new Error(mensagemErroServidor);
+            }
+
             const dados = await resposta.json();
             document.getElementById('descritivoGeradoIA').value = dados.choices[0].message.content.trim();
         } catch (erro) {
             console.error(erro);
-            alert("Erro de conexão com o Groq. O erro desaparecerá assim que hospedar o projeto no GitHub Pages!");
+            alert(`Falha no Groq:\n${erro.message}\n\nVerifique se sua chave API está correta e ativa.`);
         } finally {
             btn.disabled = false;
             btn.innerText = "✨ Gerar Descritivo Comercial por IA baseado na tabela";
         }
     }
 
-    function obterTextoLogistica() {
+    function obtenerTextoLogistica() {
         const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
         if (tipoFrete === 'incluso') return "Entrega e montagem técnica sob responsabilidade da Móveis Cristal inclusa no projeto.";
         if (tipoFrete === 'vlrFrete') return `Logística e montagem sob taxa adicional de R$ ${document.getElementById('vlrFreteInput').value}.`;
@@ -852,7 +843,7 @@
             
             return `Entrada de R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} (${pctEntrada}%) + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} no cartão (${rotuloJuros}).`;
         }
-        return "Condição customizada acertada previamente.";
+        return "Condição customizada acordada previamente.";
     }
 
     function obterAssinaturaVendedor() {
@@ -878,7 +869,7 @@
 
         let linhasItens = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
-            const desc = App = linha.querySelector('.item-desc').value.trim();
+            const desc = linha.querySelector('.item-desc').value.trim();
             const qtd = parseInt(linha.querySelector('.item-qtd').value) || 0;
             const valor = converterTextoParaFloat(linha.querySelector('.item-valor').value);
             if (desc !== "") linhasItens.push({ desc, qtd, sub: (qtd * valor) });
