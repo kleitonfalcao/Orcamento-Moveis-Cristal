@@ -340,7 +340,6 @@
             .table-input { pointer-events: none; }
             .total-container, .nota-informativa, .bloco-estatico-obs { background-color: #fff; border: 1px solid black; color: black; }
             
-            /* Forçar visibilidade correta dos textos de descritivo no PDF */
             #descritivoGeradoIA, #descritivoLivreProjetoExibicaoPrint {
                 background-color: transparent !important;
                 border: none !important;
@@ -572,7 +571,7 @@
 
         <div class="bloco-estatico-obs">
             <strong style="color: var(--primary-color); font-size: 15px;">📋 Observações Adicionais:</strong>
-            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defeitos de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
+            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defects de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
             <p>• <strong>Entrega e Montagem:</strong> A entrega e montagem serão realizadas conforme o projeto aprovado.</p>
             <p>● <strong>Nota:</strong> Todo o serviço será executado conforme projeto.</p>
         </div>
@@ -622,8 +621,8 @@
         
         document.body.addEventListener('input', function(e) {
             if(e.target.classList.contains('moeda-input')) { mascararMoeda(e.target); }
+            if(e.target.tagName === 'TEXTAREA') { ajustarAlturaTextareas(); }
         });
-     head.addEventListener('input', function() { ajustarAlturaTextareas(); });
     });
 
     function ajustarAlturaTextareas() {
@@ -799,7 +798,7 @@
 
         let itensLista = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
-            const desc = linha.querySelector('.item-desc').value.trim();
+            const desc = App = linha.querySelector('.item-desc').value.trim();
             const qtd = linha.querySelector('.item-qtd').value;
             if(desc) itensLista.push(`${qtd}x ${desc}`);
         });
@@ -918,7 +917,6 @@ CRITÉRIOS RIGOROSOS:
 
         let msg = "";
 
-        // Regra de Fluxo de Texto Dinâmico baseada no preenchimento
         if (!usarCopyIA) {
             msg += `Olá, *${nome}*! Segue o descritivo técnico comercial do seu orçamento na *Móveis Cristal*:\n\n`;
             msg += `📋 *Orçamento nº:* ${numero}\n`;
@@ -927,7 +925,6 @@ CRITÉRIOS RIGOROSOS:
                 msg += `📐 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
             });
             
-            // Se o campo da IA tiver texto, ele vai no WhatsApp Manual, senão usa o rascunho puramente manual
             if(descritivoIA) {
                 msg += `📝 *Especificações Técnicas:*\n${descritivoIA}\n\n`;
             } else if(descritivoManual) {
@@ -942,7 +939,6 @@ CRITÉRIOS RIGOROSOS:
                 msg += `💎 *${i.desc}*\n• Engenharia técnica automatizada de alta precisão.\n• Unidades: ${i.qtd} | Total: R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}\n\n`;
             });
             
-            // Prioriza o texto Lapidado da IA se existir, se não rebaixa para o manual estruturado
             if(descritivoIA) {
                 msg += `📝 *Especificações de Fábrica (Refinado por IA):*\n${descritivoIA}\n\n`;
             } else if(descritivoManual) {
@@ -979,18 +975,14 @@ CRITÉRIOS RIGOROSOS:
         const containerManualPrint = document.getElementById('containerAreaManualPrint');
         const containerIAPrint = document.getElementById('containerAreaIA');
 
-        // REGRA DE IMPRESSÃO DINÂMICA
         if (descIA !== "") {
-            // Se a IA gerou texto, mostra apenas o da IA e oculta o manual do PDF
             containerIAPrint.style.display = 'block';
             containerManualPrint.style.display = 'none';
         } else if (descManual !== "") {
-            // Se a IA estiver vazia mas tem texto manual, espelha o manual no campo limpo de impressão e oculta o bloco da IA
             document.getElementById('descritivoLivreProjetoExibicaoPrint').value = descManual;
             containerManualPrint.style.display = 'block';
             containerIAPrint.style.display = 'none';
         } else {
-            // Se ambos estiverem vazios, não imprime nenhum dos dois blocos
             containerManualPrint.style.display = 'none';
             containerIAPrint.style.display = 'none';
         }
@@ -1004,7 +996,6 @@ CRITÉRIOS RIGOROSOS:
             return;
         }
         marcarClassesImpressao();
-        // Pequena pausa para garantir o recálculo de altura das caixas de texto antes de abrir a janela do sistema
         setTimeout(() => { window.print(); }, 300);
     }
 
