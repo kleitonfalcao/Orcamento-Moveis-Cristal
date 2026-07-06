@@ -571,13 +571,13 @@
 
         <div class="bloco-estatico-obs">
             <strong style="color: var(--primary-color); font-size: 15px;">📋 Observações Adicionais:</strong>
-            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defects de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
+            <p>● <strong>Garantia:</strong> Oferecemos 2 anos de garantia contra defeitos de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.</p>
             <p>• <strong>Entrega e Montagem:</strong> A entrega e montagem serão realizadas conforme o projeto aprovado.</p>
             <p>● <strong>Nota:</strong> Todo o serviço será executado conforme projeto.</p>
         </div>
 
         <div class="nota-informativa">
-            ⚠️ <strong>Nota Técnica de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
+            ⚠️ <strong>Nota Técnico de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
         </div>
 
         <div class="total-container">
@@ -643,7 +643,7 @@
 
     function converterTextoParaFloat(texto) {
         if(!texto) return 0;
-        let limpo = texto.replace(/\./g, "").replace(",", ".");
+        let limpo = text = texto.replace(/\./g, "").replace(",", ".");
         return parseFloat(limpo) || 0;
     }
 
@@ -798,7 +798,7 @@
 
         let itensLista = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
-            const desc = App = linha.querySelector('.item-desc').value.trim();
+            const desc = linha.querySelector('.item-desc').value.trim();
             const qtd = linha.querySelector('.item-qtd').value;
             if(desc) itensLista.push(`${qtd}x ${desc}`);
         });
@@ -853,7 +853,7 @@ CRITÉRIOS RIGOROSOS:
         }
     }
 
-    function obtenerTextoLogistica() {
+    function obterTextoLogistica() {
         const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
         if (tipoFrete === 'incluso') return "Entrega e montagem técnica sob responsabilidade da Móveis Cristal inclusa no projeto.";
         if (tipoFrete === 'vlrFrete') return `Logística e montagem sob taxa adicional de R$ ${document.getElementById('vlrFreteInput').value}.`;
@@ -893,7 +893,7 @@ CRITÉRIOS RIGOROSOS:
 
     function enviarWhatsApp(usarCopyIA) {
         const nome = document.getElementById('nomeCliente').value.trim();
-        const telefone = document.getElementById('telCliente').value.trim();
+        const telefoneRaw = document.getElementById('telCliente').value.trim();
         const numero = document.getElementById('numOrcamento').value || 'Pendente';
         const total = document.getElementById('valorTotalGeral').innerText;
         const prazo = calcularPrazoData();
@@ -902,17 +902,21 @@ CRITÉRIOS RIGOROSOS:
         const descritivoManual = document.getElementById('descritivoLivreProjeto').value.trim();
         const descritivoIA = document.getElementById('descritivoGeradoIA').value.trim();
 
-        if (!nome || !telefone) {
+        if (!nome || !telefoneRaw) {
             alert("Preencha Nome e WhatsApp do cliente.");
             return;
         }
+
+        const telefone = telefoneRaw.replace(/\D/g, '');
 
         let linhasItens = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
             const desc = linha.querySelector('.item-desc').value.trim();
             const qtd = parseInt(linha.querySelector('.item-qtd').value) || 0;
             const valor = converterTextoParaFloat(linha.querySelector('.item-valor').value);
-            if (desc !== "") linhasItens.push({ desc, qtd, sub: (qtd * valor) });
+            if (desc !== "") {
+                linhasItens.push({ desc, qtd, sub: (qtd * valor) });
+            }
         });
 
         let msg = "";
@@ -957,7 +961,7 @@ CRITÉRIOS RIGOROSOS:
         msg += `⚠️ *Aviso Importante:* Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior implicará na modificação imediata dos valores.\n\n`;
         msg += `${obterAssinaturaVendedor()}`;
 
-        window.open(`https://api.whatsapp.com/send?phone=55${telefone.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`, '_blank');
+        window.open(`https://api.whatsapp.com/send?phone=55${telefone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function marcarClassesImpressao() {
