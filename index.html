@@ -191,25 +191,25 @@
             display: none;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        /* TABELA TELA DO SISTEMA */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
         th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 15px; }
-        td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; }
-        .col-desc { width: 50%; }
+        td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .col-desc { width: 55%; }
         .col-qtd { width: 12%; }
-        .col-valor { width: 28%; }
+        .col-valor { width: 23%; }
         .col-actions { width: 10%; text-align: center; }
 
         @media (max-width: 767px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { position: absolute; top: -9999px; left: -9999px; }
             tr { border: 1px solid #cbd5e0; border-radius: 6px; margin-bottom: 12px; padding: 8px; background-color: #f7fafc; }
-            td { border: none; position: relative; padding-left: 40%; padding-top: 8px; padding-bottom: 8px; text-align: right; box-sizing: border-box; }
+            td { border: none; position: relative; padding-left: 40%; padding-top: 8px; padding-bottom: 8px; text-align: right; box-sizing: border-box; width: 100% !important; }
             td:before { position: absolute; top: 14px; left: 10px; width: 35%; padding-right: 5px; text-align: left; font-weight: bold; font-size: 14px; color: var(--primary-color); white-space: nowrap; }
             td:nth-of-type(1):before { content: "Ambiente"; }
             td:nth-of-type(2):before { content: "Qtd"; }
             td:nth-of-type(3):before { content: "Valor Unit."; }
             td:nth-of-type(4):before { content: "Ação"; }
-            .col-desc, .col-qtd, .col-valor, .col-actions { width: 100% !important; }
             .btn-remove { width: 100%; padding: 10px; }
             .table-input { width: 100% !important; text-align: right; }
             td.col-desc .table-input { text-align: left; }
@@ -324,10 +324,9 @@
         .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
 
         #blocoAssinaturaPrint { display: none; }
-        .print-only-block { display: none; }
 
         /* =========================================================================
-           REGRAS DE IMPRESSÃO PROFISSIONAL E ALINHADA (EM BLOCOS)
+           REGRAS DE IMPRESSÃO - CORRIGIDAS SEM CONFLITO MOBILE
            ========================================================================= */
         @media print {
             body { background-color: white; padding: 0; color: black; font-size: 13px; }
@@ -338,7 +337,6 @@
                 display: none !important; 
             }
             
-            /* Converter inputs em blocos limpos */
             input, textarea, select { 
                 border: none !important; 
                 background: transparent !important; 
@@ -352,9 +350,8 @@
             textarea { min-height: auto; height: auto; resize: none; overflow: hidden; }
             input[type="radio"], input[type="checkbox"] { display: none !important; }
             
-            /* Estrutura de Blocos Visuais com Linhas */
             .form-section { 
-                padding: 10px !important; 
+                padding: 12px !important; 
                 margin-bottom: 12px !important; 
                 border: 1px solid #cbd5e0 !important; 
                 border-radius: 4px !important;
@@ -363,37 +360,45 @@
             }
             .section-title { font-size: 13px; margin-bottom: 8px; border-left-width: 3px; padding-left: 6px; }
 
-            /* Grid Dinâmico de duas colunas estruturado para Informações Gerais */
             .grid-2 {
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
-                gap: 10px !important;
+                gap: 12px !important;
             }
 
-            /* Correção Estrutural: Dados do Cliente Empilhados Lado a Lado */
+            /* Dados do Cliente Perfeitos Lado a Lado */
             .grid-3 {
                 display: grid !important;
-                grid-template-columns: 1.5fr 1fr !important; /* Lado Esquerdo e Direito */
-                gap: 10px !important;
+                grid-template-columns: 1.5fr 1fr !important;
+                gap: 12px !important;
             }
-            .grid-3 .form-group:nth-child(1) { grid-column: 1; } /* Nome Completo na Esquerda */
-            .grid-3 .form-group:nth-child(2) { grid-column: 1; } /* WhatsApp embaixo do Nome */
-            .grid-3 .form-group:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; } /* E-mail na Direita alinhado */
+            .grid-3 .form-group:nth-child(1) { grid-column: 1; grid-row: 1; }
+            .grid-3 .form-group:nth-child(2) { grid-column: 1; grid-row: 2; }
+            .grid-3 .form-group:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
 
             .form-group { margin-bottom: 4px; }
             .form-group label { font-size: 11px; color: #4a5568; text-transform: uppercase; margin-bottom: 2px; }
 
-            /* Exibição das opções selecionadas nos blocos */
             .radio-option:not(.selected-print) { display: none !important; }
             .radio-option { border: none !important; background: transparent !important; padding: 0 !important; }
             .radio-option.selected-print { display: block !important; }
             .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
 
-            /* TABELA DE ITENS 100% ALINHADA E CORRIGIDA */
-            table { display: table !important; width: 100% !important; margin-bottom: 10px !important; }
+            /* FORÇAR RENDERIZAÇÃO RETILÍNEA COMPLETA DA TABELA DE ITENS NO PDF */
+            table { 
+                display: table !important; 
+                width: 100% !important; 
+                margin-bottom: 10px !important; 
+                table-layout: fixed !important; 
+                border-collapse: collapse !important;
+            }
             thead { display: table-header-group !important; }
+            thead tr { position: relative !important; top: 0 !important; left: 0 !important; display: table-row !important; }
+            tbody { display: table-row-group !important; }
             tr { display: table-row !important; border: none !important; background-color: transparent !important; padding: 0 !important; }
+            
             th { 
+                display: table-cell !important;
                 background-color: var(--primary-color) !important; 
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact; 
@@ -401,37 +406,36 @@
                 padding: 6px 8px !important; 
                 font-size: 12px !important;
                 text-transform: uppercase;
+                font-weight: bold;
             }
             td { 
                 display: table-cell !important; 
-                padding: 6px 8px !important; 
+                padding: 8px 8px !important; 
                 border-bottom: 1px solid #cbd5e0 !important; 
                 font-size: 13px !important; 
-                box-sizing: border-box;
+                text-align: left !important;
+                box-sizing: border-box !important;
             }
             
-            /* Distribuição e Alinhamento Preciso das Colunas */
+            /* Remove os pseudo-elementos ":before" do mobile para não encavalar o texto */
+            td:before { content: "" !important; display: none !important; }
+            
+            /* Definição Cirúrgica de Larguras na Impressão */
             .col-desc { width: 65% !important; text-align: left !important; }
             .col-qtd { width: 10% !important; text-align: center !important; }
             .col-valor { width: 25% !important; text-align: right !important; }
             
-            /* Alinhamento dos inputs convertidos em texto */
             .table-input.item-desc { text-align: left !important; width: 100% !important; font-weight: 500; }
             .table-input.item-qtd { text-align: center !important; width: 100% !important; }
             .table-input.item-valor { text-align: right !important; width: 100% !important; }
 
-            /* Ocultar seções vazias */
             .ocultar-vazio-print:has(textarea:placeholder-shown),
             .ocultar-vazio-print:has(textarea:empty),
             .ocultar-vazio-print:has(input:placeholder-shown) {
                 display: none !important;
             }
             
-            /* Compactação Inteligente da Área de IA */
-            #containerAreaIA, #containerAreaManualPrint {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
+            #containerAreaIA, #containerAreaManualPrint { padding: 0 !important; margin: 0 !important; }
             #descritivoGeradoIA, #descritivoLivreProjetoExibicaoPrint {
                 background-color: transparent !important;
                 border: none !important;
@@ -443,7 +447,6 @@
                 line-height: 1.4 !important;
             }
 
-            /* Container de totais compacto colado na lateral direita */
             .total-container { 
                 background-color: #edf2f7 !important; 
                 -webkit-print-color-adjust: exact; 
@@ -461,7 +464,6 @@
 
             .nota-informativa, .bloco-estatico-obs { padding: 8px; font-size: 11px; margin-top: 8px; }
 
-            /* Rodapé com Assinatura Elegante */
             #blocoAssinaturaPrint {
                 display: block !important;
                 margin-top: 35px;
@@ -474,7 +476,6 @@
                 margin: 0 auto 4px auto;
             }
 
-            /* Alternância completa para o modo Recibo */
             body.modo-impressao-recibo #formOrcamento,
             body.modo-impressao-recibo .header {
                 display: none !important;
@@ -563,7 +564,7 @@
                 </div>
                 <div class="form-group">
                     <label for="telCliente">WhatsApp</label>
-                    <input type="tel" id="telCliente" required placeholder="Ex: 47999999999">
+                    <input type="tel" id="telCliente" required placeholder="Ex: 75999999999">
                 </div>
                 <div class="form-group">
                     <label for="emailCliente">E-mail (Opcional)</label>
@@ -578,8 +579,8 @@
                 <thead>
                     <tr>
                         <th class="col-desc">Descrição do Ambiente / Móvel</th>
-                        <th class="col-qtd">Qtd</th>
-                        <th class="col-valor">Valor Unit. (R$)</th>
+                        <th class="col-qtd" style="text-align: center;">Qtd</th>
+                        <th class="col-valor" style="text-align: right;">Valor Unit. (R$)</th>
                         <th class="col-actions">Ação</th>
                     </tr>
                 </thead>
@@ -829,7 +830,7 @@
 
     function converterTextoParaFloat(texto) {
         if(!texto) return 0;
-        let limpo = texto.replace(/\./g, "").replace(",", ".");
+        let limpo = text = texto.replace(/\./g, "").replace(",", ".");
         return parseFloat(limpo) || 0;
     }
 
@@ -863,8 +864,8 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="col-desc"><input type="text" class="table-input item-desc" placeholder="Ex: Cozinha sob medida"></td>
-            <td class="col-qtd"><input type="number" class="table-input item-qtd" value="1" min="1" oninput="calcularTotal()"></td>
-            <td class="col-valor"><input type="text" class="table-input item-valor moeda-input" value="0,00" oninput="calcularTotal()"></td>
+            <td class="col-qtd" style="text-align: center;"><input type="number" class="table-input item-qtd" value="1" min="1" style="text-align: center;" oninput="calcularTotal()"></td>
+            <td class="col-valor" style="text-align: right;"><input type="text" class="table-input item-valor moeda-input" value="0,00" style="text-align: right;" oninput="calcularTotal()"></td>
             <td class="col-actions"><button type="button" class="btn-remove" onclick="removerLinhaItem(this)">✕</button></td>
         `;
         tbody.appendChild(tr);
