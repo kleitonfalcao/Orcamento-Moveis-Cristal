@@ -187,10 +187,18 @@
             min-height: 110px;
         }
 
-        /* Área do layout de Recibo Oculto por Padrão na Tela */
         #secaoReciboPrint {
             display: none;
         }
+
+        /* Estrutura padrão da tabela na tela */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 15px; }
+        td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; }
+        .col-desc { width: 50%; }
+        .col-qtd { width: 12%; }
+        .col-valor { width: 28%; }
+        .col-actions { width: 10%; text-align: center; }
 
         @media (max-width: 767px) {
             table, thead, tbody, th, td, tr { display: block; }
@@ -206,16 +214,6 @@
             .btn-remove { width: 100%; padding: 10px; }
             .table-input { width: 100% !important; text-align: right; }
             td.col-desc .table-input { text-align: left; }
-        }
-
-        @media (min-width: 768px) {
-            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-            th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 15px; }
-            td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; }
-            .col-desc { width: 50%; }
-            .col-qtd { width: 12%; }
-            .col-valor { width: 28%; }
-            .col-actions { width: 10%; text-align: center; }
         }
 
         .table-input {
@@ -326,19 +324,28 @@
         .btn-ai { background-color: #7c3aed; margin-top: 8px; padding: 14px; }
         .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
 
+        /* Área do Bloco de Assinatura Oculta na Tela */
+        #blocoAssinaturaPrint { display: none; }
+
+        /* =========================================================================
+           REGRAS DE IMPRESSÃO - REESTRUTURAÇÃO COMPACTA EM DUAS COLUNAS
+           ========================================================================= */
         @media print {
-            /* Regra Padrão para quando Imprime o Orçamento */
-            body { background-color: white; padding: 0; color: black; }
-            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            body { background-color: white; padding: 0; color: black; font-size: 14px; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; width: 100%; }
+            
+            /* Ocultar botões e seções de configuração */
             .action-panel, .btn-add, .col-actions, .btn-remove, button, 
             .btn-add-linha, .config-section, .btn-ai, .rascunho-manual-container { 
                 display: none !important; 
             }
+            
+            /* Converter inputs em texto simples estático */
             input, textarea, select { 
                 border: none !important; 
                 background: transparent !important; 
                 padding: 0 !important; 
-                font-size: 16px !important; 
+                font-size: 14px !important; 
                 color: black !important;
                 box-shadow: none !important;
                 appearance: none;
@@ -346,34 +353,88 @@
             }
             textarea { min-height: auto; height: auto; resize: none; overflow: hidden; }
             input[type="radio"], input[type="checkbox"] { display: none !important; }
+            
+            /* Ajustar títulos das seções */
+            .form-section { padding: 0; margin-bottom: 15px; border: none; }
+            .section-title { font-size: 14px; margin-bottom: 6px; border-left-width: 3px; padding-left: 6px; }
+
+            /* Criar Layout de Duas Colunas usando o espaço lateral no PDF */
+            .grid-2, .grid-3 {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 15px !important;
+            }
+            .form-group { margin-bottom: 6px; }
+
+            /* Ajustar visualização das opções selecionadas */
             .radio-option:not(.selected-print) { display: none !important; }
             .radio-option { border: none !important; background: transparent !important; padding: 0 !important; }
             .radio-option.selected-print { display: block !important; }
+            .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
+
+            /* Deixar a tabela de itens muito mais limpa e compacta */
+            table, thead, tbody, th, td, tr { display: table !important; width: 100% !important; }
+            th { background-color: var(--primary-color) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white !important; padding: 6px !important; font-size: 13px; }
+            td { padding: 6px !important; border-bottom: 1px solid #cbd5e0 !important; font-size: 13px !important; }
+            .col-desc { width: 55% !important; }
+            .col-qtd { width: 10% !important; text-align: center !important; }
+            .col-valor { width: 35% !important; text-align: right !important; }
+            .table-input { text-align: left !important; padding: 0 !important; }
+            .item-qtd, .item-valor { text-align: right !important; }
+
+            /* Ocultar seções vazias */
             .ocultar-vazio-print:has(textarea:placeholder-shown),
             .ocultar-vazio-print:has(textarea:empty),
             .ocultar-vazio-print:has(input:placeholder-shown) {
                 display: none !important;
             }
-            .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
-            .table-input { pointer-events: none; }
-            .total-container, .nota-informativa, .bloco-estatico-obs { background-color: #fff; border: 1px solid black; color: black; }
             
+            /* Ajustar blocos de texto gerados */
             #descritivoGeradoIA, #descritivoLivreProjetoExibicaoPrint {
                 background-color: transparent !important;
                 border: none !important;
                 color: #000 !important;
                 padding: 0 !important;
-                font-size: 16px !important;
+                font-size: 14px !important;
                 width: 100% !important;
                 display: block !important;
             }
 
-            /* Se a classe global de impressão de recibo estiver ativa */
+            /* Container de totais compacto alinhado à direita */
+            .total-container { 
+                background-color: #edf2f7 !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                border: 1px solid #cbd5e0; 
+                color: var(--primary-color); 
+                padding: 10px; 
+                font-size: 18px; 
+                margin-top: 10px;
+                display: block !important;
+                width: 40%;
+                margin-left: auto;
+            }
+
+            .nota-informativa, .bloco-estatico-obs { padding: 8px; font-size: 12px; margin-top: 10px; }
+
+            /* Mostrar Bloco de Assinatura Elegante no Rodapé */
+            #blocoAssinaturaPrint {
+                display: block !important;
+                margin-top: 50px;
+                text-align: center;
+                page-break-inside: avoid;
+            }
+            .linha-assinatura {
+                width: 280px;
+                border-top: 1px solid #718096;
+                margin: 0 auto 5px auto;
+            }
+
+            /* Alternância completa para o modo Recibo */
             body.modo-impressao-recibo #formOrcamento,
             body.modo-impressao-recibo .header {
                 display: none !important;
             }
-
             body.modo-impressao-recibo #secaoReciboPrint {
                 display: block !important;
                 width: 100%;
@@ -397,7 +458,6 @@
         </div>
     </div>
 
-    <!-- Área Oculta na Tela que vira o Recibo Exclusivo na Impressão -->
     <div id="secaoReciboPrint">
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 30px;">
             <h1 style="margin: 0; font-size: 28px; text-transform: uppercase;">Móveis Cristal</h1>
@@ -644,6 +704,12 @@
             Total Geral: R$ <span id="valorTotalGeral">0,00</span>
         </div>
 
+        <div id="blocoAssinaturaPrint">
+            <div class="linha-assinatura"></div>
+            <strong id="nomeAssinaturaVendedor">MAURO FALCÃO</strong><br>
+            <span>Consultor Técnico Técnico - Móveis Cristal</span>
+        </div>
+
         <div class="action-panel">
             <button type="button" class="btn-main btn-whatsapp-simple" onclick="enviarWhatsApp(false)">
                 💬 Enviar WhatsApp (Texto Manual)
@@ -859,7 +925,7 @@
     async function gerarDescritivoComGroq() {
         const apiKey = document.getElementById('apiKeyGroq').value.trim();
         if (!apiKey) {
-            alert("Por favor, insira a chave do Groq no campo verde lá no topo do rodapé.");
+            alert("Por favor, insira a chave do Groq no campo verde lá no rodapé.");
             window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
             return;
         }
@@ -881,18 +947,76 @@
         btn.disabled = true;
         btn.innerText = "⏳ Estruturando e Polindo...";
 
-        const promptEnvio = `Você é o assistente técnico de redação da Móveis Cristal.
-Sua única tarefa é ler as "Anotações Manuais" fornecidas pelo projetista e organizá-las de forma bonita, limpa, estruturada e profissional para o cliente.
+        const promptEnvio = `Você é o assistente de redação técnica da Móveis Cristal.
+Sua única função é transformar as anotações do projetista em uma apresentação organizada, agradável e profissional para envio ao cliente pelo WhatsApp.
+Utilize exclusivamente as informações fornecidas nas "Anotações do Projetista" e na lista de ambientes. Não utilize conhecimento próprio, não faça deduções e não complete informações ausentes.
 
-DADOS REAIS DO PROJETO (Use APENAS estes dados para a parte técnica):
-Ambientes em tabela: ${itensLista.join(' | ')}
-Anotações do Projetista: ${anotacoesManuais}
+Regras obrigatórias
 
-CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
-1. Você está PROIBIDO de inventar ou deduzir informações técnicas. Se não estiver escrito se é MDF ou MDP, tamanho ou cor, você NÃO deve inventar nada.
-2. Seja extremamente sucinto, direto e focado na informação estruturada. Evite parágrafos longos, textos redundantes ou textos comerciais excessivamente grandes.
-3. Use a sintaxe correta de texto do WhatsApp: Use estritamente 1 asterisco para fazer o *Negrito* (ex: *texto*). Você está TERMINANTEMENTE PROIBIDO de usar dois asteriscos (**assim**), pois isso quebra o layout nativo do WhatsApp.
-4. Nunca envie saudações, introduções ("Aqui está o seu texto:") ou notas de rodapé. Devolva apenas o texto limpo direto.`;
+Nunca invente informações.
+Não adicione medidas, materiais, cores, ferragens, acessórios, acabamentos, marcas, quantidades, prazos, valores ou qualquer outra informação que não esteja explicitamente informada.
+
+Se uma informação não existir, simplesmente não a mencione.
+
+Nunca faça suposições.
+Não interprete anotações ambíguas.
+
+Não conclua que algo existe apenas porque é comum em móveis planejados.
+
+Organize o conteúdo.
+Reestruture as informações para melhorar a leitura.
+
+Agrupe informações relacionadas.
+
+Corrija pequenos erros de escrita quando necessário, sem alterar o significado.
+
+Produza um texto agradável.
+Faça uma breve abertura valorizando o ambiente e o projeto de forma elegante e natural.
+
+Utilize linguagem cordial e profissional.
+
+Evite exageros, marketing excessivo e textos longos.
+
+Seja objetivo.
+O texto será enviado pelo WhatsApp.
+
+Priorize clareza, organização e leitura rápida.
+
+Evite repetições e informações desnecessárias.
+
+Utilize somente a formatação nativa do WhatsApp.
+Para negrito utilize exatamente um asterisco antes e um depois da palavra ou frase.
+
+Nunca utilize dois asteriscos (**).
+
+Utilize listas quando melhorar a organização.
+
+Não utilize Markdown além da formatação compatível com o WhatsApp.
+
+Preserve a fidelidade das informações.
+Não altere números.
+
+Não altere nomes.
+
+Não altere medidas.
+
+Não altere especificações técnicas.
+
+Não substitua informações por sinônimos que mudem o significado.
+
+A resposta deve conter apenas o texto final destinado ao cliente.
+Não explique o que foi feito.
+
+Não faça comentários.
+
+Não inclua observações para o usuário.
+
+Não escreva introduções como "Segue abaixo" ou "Aqui está o texto".
+A prioridade máxima é que todas as informações da resposta sejam verdadeiras, correspondam exatamente ao que foi informado e estejam apresentadas de forma bonita, organizada e profissional.
+
+DADOS PARA O TEXTO:
+Lista de Ambientes: ${itensLista.join(' | ')}
+Anotações do Projetista: ${anotacoesManuais}`;
 
         try {
             const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -904,7 +1028,7 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
                 body: JSON.stringify({
                     model: "llama-3.1-8b-instant",
                     messages: [{ role: "user", content: promptEnvio }],
-                    temperature: 0.3
+                    temperature: 0.2
                 })
             });
 
@@ -988,13 +1112,13 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
 
         const telefone = telefoneRaw.replace(/\D/g, '');
 
-        let linhasItens = [];
+        let linesItens = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
             const desc = linha.querySelector('.item-desc').value.trim();
             const qtd = parseInt(linha.querySelector('.item-qtd').value) || 0;
             const valor = converterTextoParaFloat(linha.querySelector('.item-valor').value);
             if (desc !== "") {
-                linhasItens.push({ desc, qtd, sub: (qtd * valor) });
+                linesItens.push({ desc, qtd, sub: (qtd * valor) });
             }
         });
 
@@ -1004,7 +1128,7 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
             msg += `Olá, *${nome}*! Segue o descritivo técnico comercial do seu orçamento na *Móveis Cristal*:\n\n`;
             msg += `📋 *Orçamento nº:* ${numero}\n`;
             msg += `-------------------------------------------\n\n`;
-            linhasItens.forEach(i => {
+            linesItens.forEach(i => {
                 msg += `💎 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
             });
             
@@ -1017,7 +1141,7 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
             msg += `📋 *Orçamento nº:* ${numero}\n`;
             msg += `🏗️ *Móveis a serem Industrializados (Móveis Cristal):*\n`;
             msg += `-------------------------------------------\n\n`;
-            linhasItens.forEach(i => {
+            linesItens.forEach(i => {
                 msg += `💎 *${i.desc}*\n   Qtd: ${i.qtd}x | Subtotal: *R$ ${i.sub.toLocaleString('pt-BR', {minimumFractionDigits:2})}*\n\n`;
             });
             
@@ -1050,6 +1174,14 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
         if(pagMarcado) pagMarcado.closest('.radio-option').classList.add('selected-print');
         const vendMarcado = document.querySelector('input[name="vendedorResponsavel"]:checked');
         if(vendMarcado) vendMarcado.closest('.radio-option').classList.add('selected-print');
+
+        // Sincronizar o nome no bloco de assinatura do PDF
+        const nomeVendedorPrint = document.getElementById('nomeAssinaturaVendedor');
+        if(vendMarcado && vendMarcado.value === 'kleiton') {
+            nomeVendedorPrint.innerText = "KLEITON FALCÃO";
+        } else {
+            nomeVendedorPrint.innerText = "MAURO FALCÃO";
+        }
 
         const descManual = document.getElementById('descritivoLivreProjeto').value.trim();
         const descIA = document.getElementById('descritivoGeradoIA').value.trim();
@@ -1098,7 +1230,6 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
             return;
         }
 
-        // Formatação da data para exibição no recibo
         let dataFormatada = "";
         if (dataInput) {
             const partes = dataInput.split('-');
@@ -1108,7 +1239,6 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
             dataFormatada = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
         }
 
-        // Captura da lista de ambientes
         let ambientes = [];
         document.querySelectorAll('#corpoTabela tr').forEach(linha => {
             const desc = linha.querySelector('.item-desc').value.trim();
@@ -1116,7 +1246,6 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
         });
         const textoAmbientes = ambientes.length > 0 ? ambientes.join(', ') : 'Móveis planejados conforme projeto';
 
-        // Definição da forma de pagamento descrita
         let formaPagamentoTexto = "";
         if (condicaoEspecial !== "") {
             formaPagamentoTexto = condicaoEspecial;
@@ -1124,7 +1253,6 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
             formaPagamentoTexto = obterTextoPagamento().replace('comércio de fábrica.', 'de fábrica');
         }
 
-        // Alimentação dos dados no HTML estruturado do Recibo
         document.getElementById('reciboNumContrato').innerText = numero;
         document.getElementById('reciboData').innerText = dataFormatada;
         document.getElementById('reciboNomeCliente').innerText = nome;
@@ -1132,12 +1260,10 @@ CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
         document.getElementById('reciboFormaPagamento').innerText = formaPagamentoTexto;
         document.getElementById('reciboItensListados').innerText = textoAmbientes;
 
-        // Ativação da classe de controle para ocultar o orçamento e exibir apenas o recibo
         document.body.classList.add('modo-impressao-recibo');
         
         setTimeout(() => { 
             window.print(); 
-            // Remove a classe logo após a impressão para voltar ao normal na tela
             document.body.classList.remove('modo-impressao-recibo');
         }, 300);
     }
