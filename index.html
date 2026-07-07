@@ -191,7 +191,6 @@
             display: none;
         }
 
-        /* Estrutura padrão da tabela na tela */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 15px; }
         td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; }
@@ -324,28 +323,27 @@
         .btn-ai { background-color: #7c3aed; margin-top: 8px; padding: 14px; }
         .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
 
-        /* Área do Bloco de Assinatura Oculta na Tela */
         #blocoAssinaturaPrint { display: none; }
+        .print-only-block { display: none; }
 
         /* =========================================================================
-           REGRAS DE IMPRESSÃO - REESTRUTURAÇÃO COMPACTA EM DUAS COLUNAS
+           REGRAS DE IMPRESSÃO PROFISSIONAL E ALINHADA (EM BLOCOS)
            ========================================================================= */
         @media print {
-            body { background-color: white; padding: 0; color: black; font-size: 14px; }
+            body { background-color: white; padding: 0; color: black; font-size: 13px; }
             .container { box-shadow: none; padding: 0; max-width: 100%; width: 100%; }
             
-            /* Ocultar botões e seções de configuração */
             .action-panel, .btn-add, .col-actions, .btn-remove, button, 
             .btn-add-linha, .config-section, .btn-ai, .rascunho-manual-container { 
                 display: none !important; 
             }
             
-            /* Converter inputs em texto simples estático */
+            /* Converter inputs em blocos limpos */
             input, textarea, select { 
                 border: none !important; 
                 background: transparent !important; 
                 padding: 0 !important; 
-                font-size: 14px !important; 
+                font-size: 13px !important; 
                 color: black !important;
                 box-shadow: none !important;
                 appearance: none;
@@ -354,33 +352,73 @@
             textarea { min-height: auto; height: auto; resize: none; overflow: hidden; }
             input[type="radio"], input[type="checkbox"] { display: none !important; }
             
-            /* Ajustar títulos das seções */
-            .form-section { padding: 0; margin-bottom: 15px; border: none; }
-            .section-title { font-size: 14px; margin-bottom: 6px; border-left-width: 3px; padding-left: 6px; }
+            /* Estrutura de Blocos Visuais com Linhas */
+            .form-section { 
+                padding: 10px !important; 
+                margin-bottom: 12px !important; 
+                border: 1px solid #cbd5e0 !important; 
+                border-radius: 4px !important;
+                background: #fff !important;
+                page-break-inside: avoid;
+            }
+            .section-title { font-size: 13px; margin-bottom: 8px; border-left-width: 3px; padding-left: 6px; }
 
-            /* Criar Layout de Duas Colunas usando o espaço lateral no PDF */
-            .grid-2, .grid-3 {
+            /* Grid Dinâmico de duas colunas estruturado para Informações Gerais */
+            .grid-2 {
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
-                gap: 15px !important;
+                gap: 10px !important;
             }
-            .form-group { margin-bottom: 6px; }
 
-            /* Ajustar visualização das opções selecionadas */
+            /* Correção Estrutural: Dados do Cliente Empilhados Lado a Lado */
+            .grid-3 {
+                display: grid !important;
+                grid-template-columns: 1.5fr 1fr !important; /* Lado Esquerdo e Direito */
+                gap: 10px !important;
+            }
+            .grid-3 .form-group:nth-child(1) { grid-column: 1; } /* Nome Completo na Esquerda */
+            .grid-3 .form-group:nth-child(2) { grid-column: 1; } /* WhatsApp embaixo do Nome */
+            .grid-3 .form-group:nth-child(3) { grid-column: 2; grid-row: 1 / span 2; } /* E-mail na Direita alinhado */
+
+            .form-group { margin-bottom: 4px; }
+            .form-group label { font-size: 11px; color: #4a5568; text-transform: uppercase; margin-bottom: 2px; }
+
+            /* Exibição das opções selecionadas nos blocos */
             .radio-option:not(.selected-print) { display: none !important; }
             .radio-option { border: none !important; background: transparent !important; padding: 0 !important; }
             .radio-option.selected-print { display: block !important; }
             .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
 
-            /* Deixar a tabela de itens muito mais limpa e compacta */
-            table, thead, tbody, th, td, tr { display: table !important; width: 100% !important; }
-            th { background-color: var(--primary-color) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white !important; padding: 6px !important; font-size: 13px; }
-            td { padding: 6px !important; border-bottom: 1px solid #cbd5e0 !important; font-size: 13px !important; }
-            .col-desc { width: 55% !important; }
+            /* TABELA DE ITENS 100% ALINHADA E CORRIGIDA */
+            table { display: table !important; width: 100% !important; margin-bottom: 10px !important; }
+            thead { display: table-header-group !important; }
+            tr { display: table-row !important; border: none !important; background-color: transparent !important; padding: 0 !important; }
+            th { 
+                background-color: var(--primary-color) !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+                color: white !important; 
+                padding: 6px 8px !important; 
+                font-size: 12px !important;
+                text-transform: uppercase;
+            }
+            td { 
+                display: table-cell !important; 
+                padding: 6px 8px !important; 
+                border-bottom: 1px solid #cbd5e0 !important; 
+                font-size: 13px !important; 
+                box-sizing: border-box;
+            }
+            
+            /* Distribuição e Alinhamento Preciso das Colunas */
+            .col-desc { width: 65% !important; text-align: left !important; }
             .col-qtd { width: 10% !important; text-align: center !important; }
-            .col-valor { width: 35% !important; text-align: right !important; }
-            .table-input { text-align: left !important; padding: 0 !important; }
-            .item-qtd, .item-valor { text-align: right !important; }
+            .col-valor { width: 25% !important; text-align: right !important; }
+            
+            /* Alinhamento dos inputs convertidos em texto */
+            .table-input.item-desc { text-align: left !important; width: 100% !important; font-weight: 500; }
+            .table-input.item-qtd { text-align: center !important; width: 100% !important; }
+            .table-input.item-valor { text-align: right !important; width: 100% !important; }
 
             /* Ocultar seções vazias */
             .ocultar-vazio-print:has(textarea:placeholder-shown),
@@ -389,45 +427,51 @@
                 display: none !important;
             }
             
-            /* Ajustar blocos de texto gerados */
+            /* Compactação Inteligente da Área de IA */
+            #containerAreaIA, #containerAreaManualPrint {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
             #descritivoGeradoIA, #descritivoLivreProjetoExibicaoPrint {
                 background-color: transparent !important;
                 border: none !important;
                 color: #000 !important;
-                padding: 0 !important;
-                font-size: 14px !important;
+                padding: 5px 0 0 0 !important;
+                font-size: 13px !important;
                 width: 100% !important;
                 display: block !important;
+                line-height: 1.4 !important;
             }
 
-            /* Container de totais compacto alinhado à direita */
+            /* Container de totais compacto colado na lateral direita */
             .total-container { 
                 background-color: #edf2f7 !important; 
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
                 border: 1px solid #cbd5e0; 
                 color: var(--primary-color); 
-                padding: 10px; 
-                font-size: 18px; 
-                margin-top: 10px;
+                padding: 8px 12px; 
+                font-size: 16px; 
+                margin-top: 5px;
                 display: block !important;
-                width: 40%;
+                width: 35%;
                 margin-left: auto;
+                text-align: right;
             }
 
-            .nota-informativa, .bloco-estatico-obs { padding: 8px; font-size: 12px; margin-top: 10px; }
+            .nota-informativa, .bloco-estatico-obs { padding: 8px; font-size: 11px; margin-top: 8px; }
 
-            /* Mostrar Bloco de Assinatura Elegante no Rodapé */
+            /* Rodapé com Assinatura Elegante */
             #blocoAssinaturaPrint {
                 display: block !important;
-                margin-top: 50px;
+                margin-top: 35px;
                 text-align: center;
                 page-break-inside: avoid;
             }
             .linha-assinatura {
-                width: 280px;
-                border-top: 1px solid #718096;
-                margin: 0 auto 5px auto;
+                width: 250px;
+                border-top: 1px solid #4a5568;
+                margin: 0 auto 4px auto;
             }
 
             /* Alternância completa para o modo Recibo */
@@ -458,6 +502,7 @@
         </div>
     </div>
 
+    <!-- Área do Recibo Oculta -->
     <div id="secaoReciboPrint">
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 30px;">
             <h1 style="margin: 0; font-size: 28px; text-transform: uppercase;">Móveis Cristal</h1>
@@ -697,17 +742,18 @@
         </div>
 
         <div class="nota-informativa">
-            ⚠️ <strong>Nota Técnica de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
+            ⚠️ <strong>Nota Técnico de Validade:</strong> Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior no layout, dimensões, materiais ou escopo do projeto implicará na modificação imediata dos valores e emissão de uma nova proposta técnica.
         </div>
 
         <div class="total-container">
             Total Geral: R$ <span id="valorTotalGeral">0,00</span>
         </div>
 
+        <!-- Bloco de Assinatura Corrigido -->
         <div id="blocoAssinaturaPrint">
             <div class="linha-assinatura"></div>
             <strong id="nomeAssinaturaVendedor">MAURO FALCÃO</strong><br>
-            <span>Consultor Técnico Técnico - Móveis Cristal</span>
+            <span>Consultor Técnico - Móveis Cristal</span>
         </div>
 
         <div class="action-panel">
@@ -951,68 +997,15 @@
 Sua única função é transformar as anotações do projetista em uma apresentação organizada, agradável e profissional para envio ao cliente pelo WhatsApp.
 Utilize exclusivamente as informações fornecidas nas "Anotações do Projetista" e na lista de ambientes. Não utilize conhecimento próprio, não faça deduções e não complete informações ausentes.
 
-Regras obrigatórias
-
-Nunca invente informações.
-Não adicione medidas, materiais, cores, ferragens, acessórios, acabamentos, marcas, quantidades, prazos, valores ou qualquer outra informação que não esteja explicitamente informada.
-
-Se uma informação não existir, simplesmente não a mencione.
-
-Nunca faça suposições.
-Não interprete anotações ambíguas.
-
-Não conclua que algo existe apenas porque é comum em móveis planejados.
-
-Organize o conteúdo.
-Reestruture as informações para melhorar a leitura.
-
-Agrupe informações relacionadas.
-
+Regras obrigatórias:
+Nunca invente informações. Não adicione medidas, materiais, cores, ferragens, acessórios, acabamentos, marcas, quantidades, prazos, valores ou qualquer outra informação que não esteja explicitamente informada. Se uma informação não existir, simplesmente não a mencione.
+Nunca faça suposições. Não interprete anotações ambíguas.
+Organize o conteúdo. Reestruture as informações para melhorar a leitura. Agrupe informações relacionadas.
 Corrija pequenos erros de escrita quando necessário, sem alterar o significado.
-
-Produza um texto agradável.
-Faça uma breve abertura valorizando o ambiente e o projeto de forma elegante e natural.
-
-Utilize linguagem cordial e profissional.
-
-Evite exageros, marketing excessivo e textos longos.
-
-Seja objetivo.
-O texto será enviado pelo WhatsApp.
-
-Priorize clareza, organização e leitura rápida.
-
-Evite repetições e informações desnecessárias.
-
-Utilize somente a formatação nativa do WhatsApp.
-Para negrito utilize exatamente um asterisco antes e um depois da palavra ou frase.
-
-Nunca utilize dois asteriscos (**).
-
-Utilize listas quando melhorar a organização.
-
-Não utilize Markdown além da formatação compatível com o WhatsApp.
-
-Preserve a fidelidade das informações.
-Não altere números.
-
-Não altere nomes.
-
-Não altere medidas.
-
-Não altere especificações técnicas.
-
-Não substitua informações por sinônimos que mudem o significado.
-
-A resposta deve conter apenas o texto final destinado ao cliente.
-Não explique o que foi feito.
-
-Não faça comentários.
-
-Não inclua observações para o usuário.
-
-Não escreva introduções como "Segue abaixo" ou "Aqui está o texto".
-A prioridade máxima é que todas as informações da resposta sejam verdadeiras, correspondam exatamente ao que foi informado e estejam apresentadas de forma bonita, organizada e profissional.
+Produza um texto agradável. Faça uma breve abertura valorizando o ambiente e o projeto de forma elegante e natural. Utilize linguagem cordial e profissional. Evite exageros, marketing excessivo e textos longos. Seja objetivo.
+Utilize somente a formatação nativa do WhatsApp. Para negrito utilize exatamente um asterisco antes e um depois da palavra ou frase. Nunca utilize dois asteriscos (**).
+Preserve a fidelidade das informações. Não altere números, nomes, medidas ou especificações técnicas.
+A resposta deve conter apenas o texto final destinado ao cliente. Não explique o que foi feito, não faça comentários.
 
 DADOS PARA O TEXTO:
 Lista de Ambientes: ${itensLista.join(' | ')}
@@ -1175,7 +1168,6 @@ Anotações do Projetista: ${anotacoesManuais}`;
         const vendMarcado = document.querySelector('input[name="vendedorResponsavel"]:checked');
         if(vendMarcado) vendMarcado.closest('.radio-option').classList.add('selected-print');
 
-        // Sincronizar o nome no bloco de assinatura do PDF
         const nomeVendedorPrint = document.getElementById('nomeAssinaturaVendedor');
         if(vendMarcado && vendMarcado.value === 'kleiton') {
             nomeVendedorPrint.innerText = "KLEITON FALCÃO";
