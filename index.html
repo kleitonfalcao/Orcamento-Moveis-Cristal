@@ -56,6 +56,15 @@
             font-size: 13px;
         }
 
+        .header .dados-oficiais {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #4a5568;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
         .form-section {
             margin-bottom: 18px;
             background: #fff;
@@ -178,18 +187,25 @@
             min-height: 110px;
         }
 
+        /* Área do layout de Recibo Oculto por Padrão na Tela */
+        #secaoReciboPrint {
+            display: none;
+        }
+
         @media (max-width: 767px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { position: absolute; top: -9999px; left: -9999px; }
             tr { border: 1px solid #cbd5e0; border-radius: 6px; margin-bottom: 12px; padding: 8px; background-color: #f7fafc; }
-            td { border: none; position: relative; padding-left: 35%; padding-top: 6px; padding-bottom: 6px; text-align: right; }
-            td:before { position: absolute; top: 12px; left: 10px; width: 30%; padding-right: 10px; text-align: left; font-weight: bold; font-size: 14px; color: var(--primary-color); }
+            td { border: none; position: relative; padding-left: 40%; padding-top: 8px; padding-bottom: 8px; text-align: right; box-sizing: border-box; }
+            td:before { position: absolute; top: 14px; left: 10px; width: 35%; padding-right: 5px; text-align: left; font-weight: bold; font-size: 14px; color: var(--primary-color); white-space: nowrap; }
             td:nth-of-type(1):before { content: "Ambiente"; }
             td:nth-of-type(2):before { content: "Qtd"; }
             td:nth-of-type(3):before { content: "Valor Unit."; }
             td:nth-of-type(4):before { content: "Ação"; }
             .col-desc, .col-qtd, .col-valor, .col-actions { width: 100% !important; }
             .btn-remove { width: 100%; padding: 10px; }
+            .table-input { width: 100% !important; text-align: right; }
+            td.col-desc .table-input { text-align: left; }
         }
 
         @media (min-width: 768px) {
@@ -305,11 +321,13 @@
         .btn-whatsapp-simple { background-color: #25D366; }
         .btn-whatsapp-copy { background-color: #128C7E; }
         .btn-pdf { background-color: #4a5568; }
+        .btn-recibo { background-color: #2b6cb0; }
         .btn-clear { background-color: #e53e3e; }
         .btn-ai { background-color: #7c3aed; margin-top: 8px; padding: 14px; }
         .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
 
         @media print {
+            /* Regra Padrão para quando Imprime o Orçamento */
             body { background-color: white; padding: 0; color: black; }
             .container { box-shadow: none; padding: 0; max-width: 100%; }
             .action-panel, .btn-add, .col-actions, .btn-remove, button, 
@@ -349,6 +367,20 @@
                 width: 100% !important;
                 display: block !important;
             }
+
+            /* Se a classe global de impressão de recibo estiver ativa */
+            body.modo-impressao-recibo #formOrcamento,
+            body.modo-impressao-recibo .header {
+                display: none !important;
+            }
+
+            body.modo-impressao-recibo #secaoReciboPrint {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
@@ -358,16 +390,44 @@
     <div class="header">
         <h1>Móveis Cristal</h1>
         <p>Móveis Planejados & Design de Interiores</p>
+        <div class="dados-oficiais">
+            <strong>M B Falcão</strong><br>
+            CNPJ: 23.057.477/0001-09<br>
+            Rua Itapema, loja 06, S/N, Sim, Feira de Santana - BA
+        </div>
     </div>
 
-    <div class="form-section config-section" style="background-color: #f0fdf4; border: 2px dashed #bbf7d0;">
-        <div class="section-title" style="color: #166534; border-left-color: #22c55e;">⚙️ Configuração Inicial da IA (Apenas 1 vez)</div>
-        <div class="form-group">
-            <label for="apiKeyGroq" style="font-size: 14px; color: #166534; margin-bottom: 6px;">
-                Cole a sua Chave API do Groq abaixo para ativar o gerador automático:
-            </label>
-            <input type="password" id="apiKeyGroq" placeholder="Cole aqui a chave começando com gsk_..." oninput="salvarChaveAPI()" style="padding: 10px; font-size: 15px; border-color: #86efac;">
-            <div id="statusChave" class="status-ia">⚠️ Nenhuma chave detectada. Cole a chave para ativar a IA.</div>
+    <!-- Área Oculta na Tela que vira o Recibo Exclusivo na Impressão -->
+    <div id="secaoReciboPrint">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 30px;">
+            <h1 style="margin: 0; font-size: 28px; text-transform: uppercase;">Móveis Cristal</h1>
+            <p style="margin: 5px 0 10px 0; font-style: italic; font-size: 14px;">Móveis Planejados & Design de Interiores</p>
+            <div style="font-size: 13px; font-weight: 500; line-height: 1.5; color: #000;">
+                <strong>M B Falcão</strong><br>
+                CNPJ: 23.057.477/0001-09<br>
+                Rua Itapema, loja 06, S/N, Sim, Feira de Santana - BA
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="text-transform: uppercase; letter-spacing: 1px; border: 1px solid #000; padding: 10px; display: inline-block;">RECIBO DE PAGAMENTO</h2>
+        </div>
+
+        <div style="text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 25px;">
+            Nº DO CONTRATO: <span id="reciboNumContrato"></span><br>
+            DATA: <span id="reciboData"></span>
+        </div>
+
+        <div style="font-size: 16px; line-height: 2; text-align: justify; margin-bottom: 60px;">
+            Recebi do Sr(a). <strong id="reciboNomeCliente"></strong> a quantia de 
+            <strong>R$ <span id="reciboValorTotal"></span></strong> referentes à <span id="reciboFormaPagamento"></span> 
+            sobre a venda de MÓVEIS PLANEJADOS (<span id="reciboItensListados"></span>), conforme contrato. 
+            Para maior clareza firmamos o presente.
+        </div>
+
+        <div style="text-align: center; margin-top: 100px;">
+            <div style="width: 350px; border-top: 1px solid #000; margin: 0 auto 5px auto;"></div>
+            <strong style="text-transform: uppercase; font-size: 15px;">M B FALCAO</strong>
         </div>
     </div>
 
@@ -554,16 +614,16 @@
         <div class="form-section">
             <div class="section-title">Consultor Técnico Responsável</div>
             <div class="radio-group-container">
-                <label class="radio-option" id="optVendedorKleiton">
-                    <div class="radio-header">
-                        <input type="radio" name="vendedorResponsavel" value="kleiton" checked>
-                        <span>👤 Kleiton Falcão</span>
-                    </div>
-                </label>
                 <label class="radio-option" id="optVendedorMauro">
                     <div class="radio-header">
-                        <input type="radio" name="vendedorResponsavel" value="mauro">
+                        <input type="radio" name="vendedorResponsavel" value="mauro" checked>
                         <span>👤 Mauro Falcão</span>
+                    </div>
+                </label>
+                <label class="radio-option" id="optVendedorKleiton">
+                    <div class="radio-header">
+                        <input type="radio" name="vendedorResponsavel" value="kleiton">
+                        <span>👤 Kleiton Falcão</span>
                     </div>
                 </label>
             </div>
@@ -594,11 +654,25 @@
             <button type="button" class="btn-main btn-pdf" onclick="gerarPDF()">
                 📄 Gerar PDF do Orçamento
             </button>
+            <button type="button" class="btn-main btn-recibo" onclick="gerarReciboPDF()">
+                📄 Gerar Recibo do Contrato
+            </button>
             <button type="button" class="btn-main btn-clear" onclick="limparFormulario()">
                 ❌ Limpar Todos os Dados
             </button>
         </div>
     </form>
+
+    <div class="form-section config-section" style="background-color: #f0fdf4; border: 2px dashed #bbf7d0; margin-top: 30px;">
+        <div class="section-title" style="color: #166534; border-left-color: #22c55e;">⚙️ Configuração Inicial da IA (Apenas 1 vez)</div>
+        <div class="form-group">
+            <label for="apiKeyGroq" style="font-size: 14px; color: #166534; margin-bottom: 6px;">
+                Cole a sua Chave API do Groq abaixo para ativar o gerador automático:
+            </label>
+            <input type="password" id="apiKeyGroq" placeholder="Cole aqui a chave começando com gsk_..." oninput="salvarChaveAPI()" style="padding: 10px; font-size: 15px; border-color: #86efac;">
+            <div id="statusChave" class="status-ia">⚠️ Nenhuma chave detectada. Cole a chave para ativar a IA.</div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -785,8 +859,8 @@
     async function gerarDescritivoComGroq() {
         const apiKey = document.getElementById('apiKeyGroq').value.trim();
         if (!apiKey) {
-            alert("Por favor, insira a chave do Groq no campo verde lá no topo.");
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            alert("Por favor, insira a chave do Groq no campo verde lá no topo do rodapé.");
+            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
             return;
         }
 
@@ -814,10 +888,11 @@ DADOS REAIS DO PROJETO (Use APENAS estes dados para a parte técnica):
 Ambientes em tabela: ${itensLista.join(' | ')}
 Anotações do Projetista: ${anotacoesManuais}
 
-CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
-1. Você está PROIBIDO de inventar ou deduzir informações técnicas. Se não estiver escrito se é MDF ou MDP, tamanho ou cor, você NÃO deve inventar.
-2. Você PODE (e deve) adicionar uma linguagem elegante e comercial elogiando o projeto de forma genérica (durabilidade, materiais excelentes, engenharia técnica, tradição de mercado).
-3. Use a sintaxe correta de texto do WhatsApp: Use asteriscos para *Negritos* em títulos e palavras cruciais. Nunca envie saudações, introduções ("Aqui está o seu texto:") ou notas de rodapé. Devolva apenas o texto limpo direto, formatado em parágrafos ou listas de marcadores com hífen (-) ou emoji.`;
+CRITÉRIOS RIGOROSOS DE SEGURANÇA E COMPORTAMENTO:
+1. Você está PROIBIDO de inventar ou deduzir informações técnicas. Se não estiver escrito se é MDF ou MDP, tamanho ou cor, você NÃO deve inventar nada.
+2. Seja extremamente sucinto, direto e focado na informação estruturada. Evite parágrafos longos, textos redundantes ou textos comerciais excessivamente grandes.
+3. Use a sintaxe correta de texto do WhatsApp: Use estritamente 1 asterisco para fazer o *Negrito* (ex: *texto*). Você está TERMINANTEMENTE PROIBIDO de usar dois asteriscos (**assim**), pois isso quebra o layout nativo do WhatsApp.
+4. Nunca envie saudações, introduções ("Aqui está o seu texto:") ou notas de rodapé. Devolva apenas o texto limpo direto.`;
 
         try {
             const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -865,7 +940,11 @@ CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
         const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
         
         if (tipoPag === 'vista') {
-            return `À vista com ${document.getElementById('pagDescInput').value}% de desconto comercial de fábrica.`;
+            const descValor = parseFloat(document.getElementById('pagDescInput').value) || 0;
+            if(descValor === 0) {
+                return "À vista através de condição comercial de fábrica.";
+            }
+            return `À vista com ${descValor}% de desconto comercial de fábrica.`;
         }
         if (tipoPag === 'entradaMontagem') {
             return `Entrada estruturada de ${document.getElementById('pagEntradaMontagemInput').value}% + Quitação do saldo restante no ato da montagem final.`;
@@ -922,7 +1001,6 @@ CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
         let msg = "";
 
         if (!usarCopyIA) {
-            // REGRA 1: BOTÃO MANUAL - Usa estritamente o texto manual puro
             msg += `Olá, *${nome}*! Segue o descritivo técnico comercial do seu orçamento na *Móveis Cristal*:\n\n`;
             msg += `📋 *Orçamento nº:* ${numero}\n`;
             msg += `-------------------------------------------\n\n`;
@@ -934,7 +1012,6 @@ CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
                 msg += `📝 *Especificações Técnicas:*\n${descritivoManual}\n\n`;
             }
         } else {
-            // REGRA 2: BOTÃO COPY + IA - Apresentação refinada com número do orçamento e descritivo IA
             msg += `Olá, *${nome}*! ✨ Tudo bem?\n\n`;
             msg += `O projeto dos seus sonhos já está processado para a nossa engenharia de fábrica. Desenvolvemos uma proposta de alta performance focada em elegância, durabilidade e máxima sofisticação para o seu ambiente.\n\n`;
             msg += `📋 *Orçamento nº:* ${numero}\n`;
@@ -980,7 +1057,6 @@ CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
         const containerManualPrint = document.getElementById('containerAreaManualPrint');
         const containerIAPrint = document.getElementById('containerAreaIA');
 
-        // REGRA DO PDF: Continua usando o descritivo de IA se ele estiver preenchido
         if (descIA !== "") {
             containerIAPrint.style.display = 'block';
             containerManualPrint.style.display = 'none';
@@ -1001,8 +1077,69 @@ CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
             alert("Preencha ao menos o nome do cliente.");
             return;
         }
+        document.body.classList.remove('modo-impressao-recibo');
         marcarClassesImpressao();
         setTimeout(() => { window.print(); }, 300);
+    }
+
+    function gerarReciboPDF() {
+        const nome = document.getElementById('nomeCliente').value.trim();
+        const numero = document.getElementById('numOrcamento').value;
+        const total = document.getElementById('valorTotalGeral').innerText;
+        const dataInput = document.getElementById('dataOrcamento').value;
+        const condicaoEspecial = document.getElementById('pagLivreTexto').value.trim();
+
+        if (!nome) {
+            alert("Por favor, preencha o Nome do Cliente para gerar o Recibo.");
+            return;
+        }
+        if (!numero) {
+            alert("Por favor, gere o Número do Orçamento/Contrato primeiro.");
+            return;
+        }
+
+        // Formatação da data para exibição no recibo
+        let dataFormatada = "";
+        if (dataInput) {
+            const partes = dataInput.split('-');
+            dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+        } else {
+            const hoje = new Date();
+            dataFormatada = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
+        }
+
+        // Captura da lista de ambientes
+        let ambientes = [];
+        document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+            const desc = linha.querySelector('.item-desc').value.trim();
+            if (desc) ambientes.push(desc);
+        });
+        const textoAmbientes = ambientes.length > 0 ? ambientes.join(', ') : 'Móveis planejados conforme projeto';
+
+        // Definição da forma de pagamento descrita
+        let formaPagamentoTexto = "";
+        if (condicaoEspecial !== "") {
+            formaPagamentoTexto = condicaoEspecial;
+        } else {
+            formaPagamentoTexto = obterTextoPagamento().replace('comércio de fábrica.', 'de fábrica');
+        }
+
+        // Alimentação dos dados no HTML estruturado do Recibo
+        document.getElementById('reciboNumContrato').innerText = numero;
+        document.getElementById('reciboData').innerText = dataFormatada;
+        document.getElementById('reciboNomeCliente').innerText = nome;
+        document.getElementById('reciboValorTotal').innerText = total;
+        document.getElementById('reciboFormaPagamento').innerText = formaPagamentoTexto;
+        document.getElementById('reciboItensListados').innerText = textoAmbientes;
+
+        // Ativação da classe de controle para ocultar o orçamento e exibir apenas o recibo
+        document.body.classList.add('modo-impressao-recibo');
+        
+        setTimeout(() => { 
+            window.print(); 
+            // Remove a classe logo após a impressão para voltar ao normal na tela
+            document.body.classList.remove('modo-impressao-recibo');
+        }, 300);
     }
 
     function limparFormulario() {
@@ -1018,6 +1155,7 @@ CRITÉRIOS RIGOROSOS DE FORMATAÇÃO DO WHATSAPP:
             alternarCamposPagamento();
             document.getElementById('containerAreaManualPrint').style.display = 'none';
             document.getElementById('containerAreaIA').style.display = 'block';
+            document.body.classList.remove('modo-impressao-recibo');
         }
     }
 </script>
