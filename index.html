@@ -326,7 +326,7 @@
         #blocoAssinaturaPrint { display: none; }
 
         /* =========================================================================
-           REGRAS DE IMPRESSÃO - CORRIGIDAS SEM CONFLITO MOBILE
+           REGRAS DE IMPRESSÃO
            ========================================================================= */
         @media print {
             body { background-color: white; padding: 0; color: black; font-size: 13px; }
@@ -366,7 +366,6 @@
                 gap: 12px !important;
             }
 
-            /* Dados do Cliente Perfeitos Lado a Lado */
             .grid-3 {
                 display: grid !important;
                 grid-template-columns: 1.5fr 1fr !important;
@@ -384,7 +383,6 @@
             .radio-option.selected-print { display: block !important; }
             .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
 
-            /* FORÇAR RENDERIZAÇÃO RETILÍNEA COMPLETA DA TABELA DE ITENS NO PDF */
             table { 
                 display: table !important; 
                 width: 100% !important; 
@@ -417,10 +415,8 @@
                 box-sizing: border-box !important;
             }
             
-            /* Remove os pseudo-elementos ":before" do mobile para não encavalar o texto */
             td:before { content: "" !important; display: none !important; }
             
-            /* Definição Cirúrgica de Larguras na Impressão */
             .col-desc { width: 65% !important; text-align: left !important; }
             .col-qtd { width: 10% !important; text-align: center !important; }
             .col-valor { width: 25% !important; text-align: right !important; }
@@ -750,7 +746,7 @@
             Total Geral: R$ <span id="valorTotalGeral">0,00</span>
         </div>
 
-        <!-- Bloco de Assinatura Corrigido -->
+        <!-- Bloco de Assinatura -->
         <div id="blocoAssinaturaPrint">
             <div class="linha-assinatura"></div>
             <strong id="nomeAssinaturaVendedor">MAURO FALCÃO</strong><br>
@@ -830,7 +826,7 @@
 
     function converterTextoParaFloat(texto) {
         if(!texto) return 0;
-        let limpo = text = texto.replace(/\./g, "").replace(",", ".");
+        let limpo = texto.replace(/\./g, "").replace(",", ".");
         return parseFloat(limpo) || 0;
     }
 
@@ -944,17 +940,24 @@
             totalFinal = totalBruto * (1 - (desc / 100));
             divSimulacao.innerHTML = "";
         } 
+        else if (tipoPag === 'entradaMontagem') {
+            const pctEntrada = parseFloat(document.getElementById('pagEntradaMontagemInput').value) || 0;
+            const vlrEntrada = totalBruto * (pctEntrada / 100);
+            divSimulacao.innerHTML = "";
+        }
         else if (tipoPag === 'entradaParcelas' && totalBruto > 0) {
             const pctEntrada = parseFloat(document.getElementById('pagEntradaParcInput').value) || 0;
             const qtdParc = parseInt(document.getElementById('pagQtdParcInput').value);
             const regraJuros = document.getElementById('pagRegraJuros').value;
             
+            // AJUSTE 1: Entrada calculada rigorosamente em cima do total bruto dos móveis
             const vlrEntrada = totalBruto * (pctEntrada / 100);
             let vlrSaldoOriginal = totalBruto - vlrEntrada;
             let vlrSaldoComJuros = vlrSaldoOriginal;
             
+            // AJUSTE 2: Nova fórmula usando fator complementar para repasse líquido exato da taxa
             if (regraJuros === 'com' && TABELA_TAXAS[qtdParc] !== undefined) {
-                vlrSaldoComJuros = vlrSaldoOriginal * (1 + TABELA_TAXAS[qtdParc]);
+                vlrSaldoComJuros = vlrSaldoOriginal / (1 - TABELA_TAXAS[qtdParc]);
                 totalFinal = vlrEntrada + vlrSaldoComJuros;
             }
             
@@ -1055,6 +1058,7 @@ Anotações do Projetista: ${anotacoesManuais}`;
 
     function obterTextoPagamento() {
         const totalFinal = converterTextoParaFloat(document.getElementById('valorTotalGeral').innerText);
+        const totalBruto = totalFinal; 
         const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
         
         if (tipoPag === 'vista') {
@@ -1072,9 +1076,26 @@ Anotações do Projetista: ${anotacoesManuais}`;
             const qtdParc = parseInt(document.getElementById('pagQtdParcInput').value);
             const regraJuros = document.getElementById('pagRegraJuros').value;
             
-            const vlrEntrada = totalFinal * (pctEntrada / 100);
-            const vlrSaldo = totalFinal - vlrEntrada;
-            const vlrParcela = vlrSaldo / (qtdParc === 0 ? 1 : qtdParc);
+            let totalSomaBruta = 0;
+            document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+                const q = parseFloat(linha.querySelector('.item-qtd').value) || 0;
+                const v = converterTextoParaFloat(linha.querySelector('.item-valor').value);
+                totalSomaBruta += (q * v);
+            });
+            const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
+            if (tipoFrete === 'vlrFrete') {
+                totalSomaBruta += converterTextoParaFloat(document.getElementById('vlrFreteInput').value);
+            }
+
+            const vlrEntrada = totalSomaBruta * (pctEntrada / 100);
+            let vlrSaldoOriginal = totalSomaBruta - vlrEntrada;
+            let vlrSaldoComJuros = vlrSaldoOriginal;
+            
+            if (regraJuros === 'com' && TABELA_TAXAS[qtdParc] !== undefined) {
+                vlrSaldoComJuros = vlrSaldoOriginal / (1 - TABELA_TAXAS[qtdParc]);
+            }
+            
+            const vlrParcela = vlrSaldoComJuros / (qtdParc === 0 ? 1 : qtdParc);
             const rotuloParc = qtdParc === 0 ? "Débito" : `${qtdParc}x`;
             const rotuloJuros = regraJuros === 'com' ? "com taxas da maquininha inclusas" : "sem juros direto de fábrica";
             
