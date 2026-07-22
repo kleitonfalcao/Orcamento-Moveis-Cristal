@@ -224,7 +224,6 @@
             font-size: 16px;
         }
 
-        /* Estilos do Upload de Fotos */
         .btn-upload-foto {
             background-color: #4a5568;
             color: white;
@@ -335,6 +334,20 @@
             display: block;
         }
 
+        /* CAIXA VERDE DE ECONOMIA */
+        .box-economia-verde {
+            display: none;
+            background-color: #f0fdf4;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
         .btn-add {
             background-color: var(--secondary-color);
             color: white;
@@ -437,9 +450,10 @@
         .btn-ai:disabled { background-color: #a78bfa; cursor: not-allowed; }
 
         #blocoAssinaturaPrint { display: none; }
+        #containerCondicaoEspecialPrint { display: none; }
 
         /* =========================================================================
-           REGRAS DE IMPRESSÃO
+           REGRAS DE IMPRESSÃO / PDF
            ========================================================================= */
         @media print {
             body { background-color: white; padding: 0; color: black; font-size: 13px; }
@@ -497,6 +511,17 @@
             .radio-option.selected-print { display: block !important; }
             .dynamic-inline-field { margin-left: 0 !important; display: inline !important; }
 
+            .box-economia-verde {
+                background-color: #f0fdf4 !important;
+                border: 1px solid #86efac !important;
+                color: #166534 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                display: block !important;
+                margin-top: 8px !important;
+                font-size: 12px !important;
+            }
+
             table { 
                 display: table !important; 
                 width: 100% !important; 
@@ -539,12 +564,6 @@
             .table-input.item-qtd { text-align: center !important; width: 100% !important; }
             .table-input.item-valor { text-align: right !important; width: 100% !important; }
 
-            .ocultar-vazio-print:has(textarea:placeholder-shown),
-            .ocultar-vazio-print:has(textarea:empty),
-            .ocultar-vazio-print:has(input:placeholder-shown) {
-                display: none !important;
-            }
-            
             #containerAreaIA, #containerAreaManualPrint { padding: 0 !important; margin: 0 !important; }
             #descritivoGeradoIA, #descritivoLivreProjetoExibicaoPrint {
                 background-color: transparent !important;
@@ -554,6 +573,12 @@
                 font-size: 13px !important;
                 width: 100% !important;
                 display: block !important;
+                line-height: 1.4 !important;
+            }
+
+            #containerCondicaoEspecialPrint {
+                display: block !important;
+                font-size: 13px !important;
                 line-height: 1.4 !important;
             }
 
@@ -598,6 +623,7 @@
                 print-color-adjust: exact;
             }
 
+            /* MODO IMPRESSÃO DE RECIBO */
             body.modo-impressao-recibo #formOrcamento,
             body.modo-impressao-recibo .header,
             body.modo-impressao-recibo #secaoGaleriaFotosPrint {
@@ -607,8 +633,15 @@
                 display: block !important;
                 width: 100%;
                 margin: 0;
-                padding: 20px;
+                padding: 0;
                 box-sizing: border-box;
+            }
+            .recibo-card-print {
+                page-break-after: always;
+                padding: 20px;
+            }
+            .recibo-card-print:last-child {
+                page-break-after: auto;
             }
         }
     </style>
@@ -626,39 +659,8 @@
         </div>
     </div>
 
-    <!-- Área do Recibo Oculta -->
-    <div id="secaoReciboPrint">
-        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 30px;">
-            <h1 style="margin: 0; font-size: 28px; text-transform: uppercase;">Móveis Cristal</h1>
-            <p style="margin: 5px 0 10px 0; font-style: italic; font-size: 14px;">Móveis Planejados & Design de Interiores</p>
-            <div style="font-size: 13px; font-weight: 500; line-height: 1.5; color: #000;">
-                <strong>M B Falcão</strong><br>
-                CNPJ: 23.057.477/0001-09<br>
-                Rua Itapema, loja 06, S/N, Sim, Feira de Santana - BA
-            </div>
-        </div>
-        
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="text-transform: uppercase; letter-spacing: 1px; border: 1px solid #000; padding: 10px; display: inline-block;">RECIBO DE PAGAMENTO</h2>
-        </div>
-
-        <div style="text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 25px;">
-            Nº DO CONTRATO: <span id="reciboNumContrato"></span><br>
-            DATA: <span id="reciboData"></span>
-        </div>
-
-        <div style="font-size: 16px; line-height: 2; text-align: justify; margin-bottom: 60px;">
-            Recebi do Sr(a). <strong id="reciboNomeCliente"></strong> a quantia de 
-            <strong>R$ <span id="reciboValorTotal"></span></strong> referentes à <span id="reciboFormaPagamento"></span> 
-            sobre a venda de MÓVEIS PLANEJADOS (<span id="reciboItensListados"></span>), conforme contrato. 
-            Para maior clareza firmamos o presente.
-        </div>
-
-        <div style="text-align: center; margin-top: 100px;">
-            <div style="width: 350px; border-top: 1px solid #000; margin: 0 auto 5px auto;"></div>
-            <strong style="text-transform: uppercase; font-size: 15px;">M B FALCAO</strong>
-        </div>
-    </div>
+    <!-- Área Dinâmica do Recibo (Preenchida via JS) -->
+    <div id="secaoReciboPrint"></div>
 
     <form id="formOrcamento">
         <div class="form-section">
@@ -802,19 +804,23 @@
                     <div class="dynamic-inline-field">
                         <span>Regra de Taxa:</span>
                         <select id="pagRegraJuros" disabled onchange="calcularTotal()">
-                            <option value="sem">Sem Juros (Direto de Fábrica)</option>
-                            <option value="com">Com Juros (Repasse de Taxa Maquininha)</option>
+                            <option value="sem">Sem Taxa (Direto de Fábrica)</option>
+                            <option value="com">Com Taxa (Repasse de Maquininha)</option>
                         </select>
                     </div>
                     <div id="simulacaoParcelas" style="margin-left: 32px; font-size: 14px; font-weight: bold; color: var(--secondary-color); margin-top: 5px;"></div>
                 </label>
             </div>
+
+            <!-- Caixa Verde de Economia Visível Tela/PDF -->
+            <div id="boxEconomiaVerde" class="box-economia-verde"></div>
         </div>
 
-        <div class="form-section ocultar-vazio-print">
+        <div class="form-section">
             <div class="section-title">Condições Especiais de Pagamento</div>
             <div class="form-group">
-                <textarea id="pagLivreTexto" placeholder="Caso precise descrever regras customizadas, digite aqui... Se ficar em branco, não aparecerá no PDF."></textarea>
+                <textarea id="pagLivreTexto" placeholder="Caso precise descrever regras customizadas, digite aqui... Aparecerá no PDF e WhatsApp."></textarea>
+                <div id="containerCondicaoEspecialPrint"></div>
             </div>
         </div>
 
@@ -947,7 +953,7 @@
 
     function ajustarAlturaTextareas() {
         document.querySelectorAll('textarea').forEach(tx => {
-            if(tx.id === 'descritivoGeradoIA' || tx.id === 'descritivoLivreProjetoExibicaoPrint') {
+            if(tx.id === 'descritivoGeradoIA' || tx.id === 'descritivoLivreProjetoExibicaoPrint' || tx.id === 'pagLivreTexto') {
                 tx.style.height = 'auto';
                 tx.style.height = tx.scrollHeight + 'px';
             }
@@ -1018,7 +1024,6 @@
         calcularTotal();
     }
 
-    /* COMPACTAÇÃO E MANIPULAÇÃO DE FOTOS DO AMBIENTE */
     function compressImage(file, maxWidth = 1000, maxHeight = 1000, quality = 0.75) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -1154,17 +1159,29 @@
 
         const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
         const divSimulacao = document.getElementById('simulacaoParcelas');
+        const divEconomia = document.getElementById('boxEconomiaVerde');
         let totalFinal = totalBruto;
 
         if (tipoPag === 'vista') {
             const desc = parseFloat(document.getElementById('pagDescInput').value) || 0;
             totalFinal = totalBruto * (1 - (desc / 100));
             divSimulacao.innerHTML = "";
+            divEconomia.style.display = "none";
         } 
         else if (tipoPag === 'entradaMontagem') {
             const pctEntrada = parseFloat(document.getElementById('pagEntradaMontagemInput').value) || 0;
-            const vlrEntrada = totalBruto * (pctEntrada / 100);
             divSimulacao.innerHTML = "";
+
+            const pctDescVista = parseFloat(document.getElementById('pagDescInput').value) || 10;
+            const totalVistaCalculado = totalBruto * (1 - (pctDescVista / 100));
+            const economia = totalBruto - totalVistaCalculado;
+
+            if (totalBruto > 0 && economia > 0) {
+                divEconomia.style.display = 'block';
+                divEconomia.innerHTML = `💡 <strong>Escolha pagar à vista por R$ ${totalVistaCalculado.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})} e economize R$ ${economia.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}!</strong>`;
+            } else {
+                divEconomia.style.display = 'none';
+            }
         }
         else if (tipoPag === 'entradaParcelas' && totalBruto > 0) {
             const pctEntrada = parseFloat(document.getElementById('pagEntradaParcInput').value) || 0;
@@ -1182,10 +1199,23 @@
             
             const vlrParcela = vlrSaldoComJuros / (qtdParc === 0 ? 1 : qtdParc);
             const rotuloParc = qtdParc === 0 ? "Débito" : `${qtdParc}x`;
+            const rotuloTaxa = regraJuros === 'com' ? '(com taxa)' : '(sem taxa)';
             
-            divSimulacao.innerHTML = `💸 Resumo: Entrada: R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} ${regraJuros === 'com' ? '(Juros inclusos no Total)' : '(Sem Juros)'}`;
+            divSimulacao.innerHTML = `💸 Resumo: Entrada: R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} ${rotuloTaxa}`;
+
+            const pctDescVista = parseFloat(document.getElementById('pagDescInput').value) || 10;
+            const totalVistaCalculado = totalBruto * (1 - (pctDescVista / 100));
+            const economia = totalFinal - totalVistaCalculado;
+
+            if (economia > 0) {
+                divEconomia.style.display = 'block';
+                divEconomia.innerHTML = `💡 <strong>Escolha pagar à vista por R$ ${totalVistaCalculado.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})} e economize R$ ${economia.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}!</strong>`;
+            } else {
+                divEconomia.style.display = 'none';
+            }
         } else {
             divSimulacao.innerHTML = "";
+            divEconomia.style.display = "none";
         }
 
         document.getElementById('valorTotalGeral').innerText = totalFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1277,7 +1307,6 @@ Anotações do Projetista: ${anotacoesManuais}`;
 
     function obterTextoPagamento() {
         const totalFinal = converterTextoParaFloat(document.getElementById('valorTotalGeral').innerText);
-        const totalBruto = totalFinal; 
         const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
         
         if (tipoPag === 'vista') {
@@ -1316,9 +1345,9 @@ Anotações do Projetista: ${anotacoesManuais}`;
             
             const vlrParcela = vlrSaldoComJuros / (qtdParc === 0 ? 1 : qtdParc);
             const rotuloParc = qtdParc === 0 ? "Débito" : `${qtdParc}x`;
-            const rotuloJuros = regraJuros === 'com' ? "com taxas da maquininha inclusas" : "sem juros direto de fábrica";
+            const rotuloTaxa = regraJuros === 'com' ? "com taxa" : "sem taxa";
             
-            return `Entrada de R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} (${pctEntrada}%) + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} no cartão (${rotuloJuros}).`;
+            return `Entrada de R$ ${vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2})} (${pctEntrada}%) + Saldo em ${rotuloParc} de R$ ${vlrParcela.toLocaleString('pt-BR', {minimumFractionDigits:2})} no cartão (${rotuloTaxa}).`;
         }
         return "Condição customizada acordada previamente.";
     }
@@ -1391,8 +1420,13 @@ Anotações do Projetista: ${anotacoesManuais}`;
         if(prazo) msg += `⏳ *Prazo de Entrega:* ${prazo}\n`;
         msg += `💳 *Condição Proposta:* ${obterTextoPagamento()}\n`;
         if(condicaoEspecial) msg += `📝 *Condições Especiais:* ${condicaoEspecial}\n`;
-        msg += `🔥 *INVESTIMENTO TOTAL:* R$ ${total}\n\n`;
 
+        const divEconomia = document.getElementById('boxEconomiaVerde');
+        if(divEconomia.style.display !== 'none' && divEconomia.innerText) {
+            msg += `\n${divEconomia.innerText}\n`;
+        }
+
+        msg += `\n🔥 *INVESTIMENTO TOTAL:* R$ ${total}\n\n`;
         msg += `📋 *Observações Adicionais:*\n• *Garantia:* Oferecemos 2 anos de garantia contra defeitos de fabricação. A garantia não cobre mau uso, limpeza inadequada ou falta de conservação.\n• *Entrega e Montagem:* A entrega e montagem serão realizadas conforme o projeto aprovado.\n• *Nota:* Todo o serviço será executado conforme projeto.\n\n`;
         msg += `⚠️ *Aviso Importante:* Este orçamento foi desenvolvido rigorosamente conforme o projeto apresentado. Qualquer alteração posterior implicará na modificação imediata dos valores.\n\n`;
         msg += `${obterAssinaturaVendedor()}`;
@@ -1471,6 +1505,16 @@ Anotações do Projetista: ${anotacoesManuais}`;
             containerManualPrint.style.display = 'none';
             containerIAPrint.style.display = 'none';
         }
+
+        const condEspecialTexto = document.getElementById('pagLivreTexto').value.trim();
+        const containerCondPrint = document.getElementById('containerCondicaoEspecialPrint');
+        if(condEspecialTexto !== "") {
+            containerCondPrint.innerHTML = `<strong>Condições Especiais:</strong><br>${condEspecialTexto.replace(/\n/g, '<br>')}`;
+            containerCondPrint.style.display = 'block';
+        } else {
+            containerCondPrint.innerHTML = "";
+            containerCondPrint.style.display = 'none';
+        }
         
         atualizarGaleriaPDF();
         ajustarAlturaTextareas();
@@ -1486,10 +1530,46 @@ Anotações do Projetista: ${anotacoesManuais}`;
         setTimeout(() => { window.print(); }, 300);
     }
 
+    function criarHTMLRecibo(num, data, cliente, valorStr, formaPag, ambientes, titulo) {
+        return `
+        <div class="recibo-card-print">
+            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 30px;">
+                <h1 style="margin: 0; font-size: 28px; text-transform: uppercase;">Móveis Cristal</h1>
+                <p style="margin: 5px 0 10px 0; font-style: italic; font-size: 14px;">Móveis Planejados & Design de Interiores</p>
+                <div style="font-size: 13px; font-weight: 500; line-height: 1.5; color: #000;">
+                    <strong>M B Falcão</strong><br>
+                    CNPJ: 23.057.477/0001-09<br>
+                    Rua Itapema, loja 06, S/N, Sim, Feira de Santana - BA
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="text-transform: uppercase; letter-spacing: 1px; border: 1px solid #000; padding: 10px; display: inline-block;">${titulo}</h2>
+            </div>
+
+            <div style="text-align: right; font-weight: bold; font-size: 16px; margin-bottom: 25px;">
+                Nº DO CONTRATO: <span>${num}</span><br>
+                DATA: <span>${data}</span>
+            </div>
+
+            <div style="font-size: 16px; line-height: 2; text-align: justify; margin-bottom: 60px;">
+                Recebi do Sr(a). <strong>${cliente}</strong> a quantia de 
+                <strong>R$ ${valorStr}</strong> referentes à <span>${formaPag}</span> 
+                sobre a venda de MÓVEIS PLANEJADOS (<span>${ambientes}</span>), conforme contrato. 
+                Para maior clareza firmamos o presente.
+            </div>
+
+            <div style="text-align: center; margin-top: 80px;">
+                <div style="width: 350px; border-top: 1px solid #000; margin: 0 auto 5px auto;"></div>
+                <strong style="text-transform: uppercase; font-size: 15px;">M B FALCAO</strong>
+            </div>
+        </div>`;
+    }
+
     function gerarReciboPDF() {
         const nome = document.getElementById('nomeCliente').value.trim();
         const numero = document.getElementById('numOrcamento').value;
-        const total = document.getElementById('valorTotalGeral').innerText;
+        const totalStr = document.getElementById('valorTotalGeral').innerText;
         const dataInput = document.getElementById('dataOrcamento').value;
         const condicaoEspecial = document.getElementById('pagLivreTexto').value.trim();
 
@@ -1518,19 +1598,49 @@ Anotações do Projetista: ${anotacoesManuais}`;
         });
         const textoAmbientes = ambientes.length > 0 ? ambientes.join(', ') : 'Móveis planejados conforme projeto';
 
-        let formaPagamentoTexto = "";
-        if (condicaoEspecial !== "") {
-            formaPagamentoTexto = condicaoEspecial;
-        } else {
-            formaPagamentoTexto = obterTextoPagamento().replace('comércio de fábrica.', 'de fábrica');
+        const tipoPag = document.querySelector('input[name="tipoPagamento"]:checked').value;
+        const secaoRecibo = document.getElementById('secaoReciboPrint');
+        secaoRecibo.innerHTML = ""; 
+
+        let totalBrutoNum = 0;
+        document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+            const q = parseFloat(linha.querySelector('.item-qtd').value) || 0;
+            const v = converterTextoParaFloat(linha.querySelector('.item-valor').value);
+            totalBrutoNum += (q * v);
+        });
+        const tipoFrete = document.querySelector('input[name="tipoFrete"]:checked').value;
+        if (tipoFrete === 'vlrFrete') {
+            totalBrutoNum += converterTextoParaFloat(document.getElementById('vlrFreteInput').value);
         }
 
-        document.getElementById('reciboNumContrato').innerText = numero;
-        document.getElementById('reciboData').innerText = dataFormatada;
-        document.getElementById('reciboNomeCliente').innerText = nome;
-        document.getElementById('reciboValorTotal').innerText = total;
-        document.getElementById('reciboFormaPagamento').innerText = formaPagamentoTexto;
-        document.getElementById('reciboItensListados').innerText = textoAmbientes;
+        if (tipoPag === 'vista') {
+            let descGeral = condicaoEspecial ? condicaoEspecial : obterTextoPagamento();
+            secaoRecibo.innerHTML = criarHTMLRecibo(numero, dataFormatada, nome, totalStr, descGeral, textoAmbientes, "RECIBO DE PAGAMENTO");
+        } 
+        else if (tipoPag === 'entradaMontagem') {
+            const pctEntrada = parseFloat(document.getElementById('pagEntradaMontagemInput').value) || 50;
+            const vlrEntrada = totalBrutoNum * (pctEntrada / 100);
+            const vlrSaldo = totalBrutoNum - vlrEntrada;
+
+            const rec1 = criarHTMLRecibo(`${numero}-1`, dataFormatada, nome, vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}), `ENTRADA (${pctEntrada}% do Contrato)`, textoAmbientes, "1º RECIBO - ENTRADA");
+            const rec2 = criarHTMLRecibo(`${numero}-2`, dataFormatada, nome, vlrSaldo.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}), `SALDO RESTANTE (Quitação na Montagem)`, textoAmbientes, "2º RECIBO - SALDO RESTANTE");
+            
+            secaoRecibo.innerHTML = rec1 + rec2;
+        } 
+        else if (tipoPag === 'entradaParcelas') {
+            const pctEntrada = parseFloat(document.getElementById('pagEntradaParcInput').value) || 30;
+            const qtdParc = parseInt(document.getElementById('pagQtdParcInput').value);
+            const vlrEntrada = totalBrutoNum * (pctEntrada / 100);
+            
+            const totalComTaxasNum = converterTextoParaFloat(totalStr);
+            const vlrSaldoRestante = totalComTaxasNum - vlrEntrada;
+            const rotuloParc = qtdParc === 0 ? "Débito" : `${qtdParc}x no Cartão`;
+
+            const rec1 = criarHTMLRecibo(`${numero}-1`, dataFormatada, nome, vlrEntrada.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}), `ENTRADA (${pctEntrada}% do Contrato)`, textoAmbientes, "1º RECIBO - ENTRADA");
+            const rec2 = criarHTMLRecibo(`${numero}-2`, dataFormatada, nome, vlrSaldoRestante.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}), `SALDO RESTANTE (${rotuloParc})`, textoAmbientes, "2º RECIBO - SALDO RESTANTE");
+
+            secaoRecibo.innerHTML = rec1 + rec2;
+        }
 
         document.body.classList.add('modo-impressao-recibo');
         
@@ -1546,6 +1656,7 @@ Anotações do Projetista: ${anotacoesManuais}`;
             document.getElementById('descritivoGeradoIA').value = '';
             document.getElementById('simulacaoParcelas').innerHTML = '';
             document.getElementById('resultadoPrazoTexto').innerHTML = '';
+            document.getElementById('boxEconomiaVerde').style.display = 'none';
             const tbody = document.getElementById('corpoTabela');
             tbody.innerHTML = '';
             for(let i=0; i<2; i++) { adicionarLinhaItem(); }
