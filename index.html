@@ -193,11 +193,12 @@
 
         /* TABELA TELA DO SISTEMA */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
-        th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 15px; }
+        th { background-color: var(--primary-color); color: white; padding: 12px 10px; text-align: left; font-size: 14px; }
         td { padding: 10px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-        .col-desc { width: 55%; }
-        .col-qtd { width: 12%; }
-        .col-valor { width: 23%; }
+        .col-desc { width: 42%; }
+        .col-qtd { width: 10%; }
+        .col-valor { width: 20%; }
+        .col-fotos { width: 18%; text-align: center; }
         .col-actions { width: 10%; text-align: center; }
 
         @media (max-width: 767px) {
@@ -209,7 +210,8 @@
             td:nth-of-type(1):before { content: "Ambiente"; }
             td:nth-of-type(2):before { content: "Qtd"; }
             td:nth-of-type(3):before { content: "Valor Unit."; }
-            td:nth-of-type(4):before { content: "Ação"; }
+            td:nth-of-type(4):before { content: "Fotos"; }
+            td:nth-of-type(5):before { content: "Ação"; }
             .btn-remove { width: 100%; padding: 10px; }
             .table-input { width: 100% !important; text-align: right; }
             td.col-desc .table-input { text-align: left; }
@@ -220,6 +222,117 @@
             box-sizing: border-box;
             padding: 10px 8px;
             font-size: 16px;
+        }
+
+        /* Estilos do Upload de Fotos */
+        .btn-upload-foto {
+            background-color: #4a5568;
+            color: white;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .btn-upload-foto:hover { background-color: #2d3748; }
+        
+        .fotos-status-container {
+            margin-top: 4px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .foto-badge-count {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .btn-limpar-fotos {
+            color: var(--danger-color);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 2px;
+        }
+
+        /* Seção da Galeria no PDF */
+        .galeria-pdf-container {
+            display: none;
+            margin-top: 30px;
+            page-break-before: always;
+        }
+
+        .galeria-pdf-header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .galeria-pdf-header h2 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .galeria-pdf-header p {
+            margin: 4px 0 0 0;
+            color: #718096;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .galeria-bloco-ambiente {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+
+        .galeria-titulo-ambiente {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: #edf2f7;
+            padding: 6px 12px;
+            border-left: 4px solid var(--secondary-color);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .galeria-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .galeria-item-card {
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+            text-align: center;
+            page-break-inside: avoid;
+            height: 220px;
+        }
+
+        .galeria-item-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .btn-add {
@@ -333,7 +446,8 @@
             .container { box-shadow: none; padding: 0; max-width: 100%; width: 100%; }
             
             .action-panel, .btn-add, .col-actions, .btn-remove, button, 
-            .btn-add-linha, .config-section, .btn-ai, .rascunho-manual-container { 
+            .btn-add-linha, .config-section, .btn-ai, .rascunho-manual-container,
+            .col-fotos, .btn-upload-foto, .btn-limpar-fotos { 
                 display: none !important; 
             }
             
@@ -472,8 +586,21 @@
                 margin: 0 auto 4px auto;
             }
 
+            /* Exibição da Galeria de Fotos no PDF */
+            .galeria-pdf-container {
+                display: block !important;
+            }
+            .galeria-pdf-container:empty {
+                display: none !important;
+            }
+            .galeria-item-card img {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
             body.modo-impressao-recibo #formOrcamento,
-            body.modo-impressao-recibo .header {
+            body.modo-impressao-recibo .header,
+            body.modo-impressao-recibo #secaoGaleriaFotosPrint {
                 display: none !important;
             }
             body.modo-impressao-recibo #secaoReciboPrint {
@@ -577,6 +704,7 @@
                         <th class="col-desc">Descrição do Ambiente / Móvel</th>
                         <th class="col-qtd" style="text-align: center;">Qtd</th>
                         <th class="col-valor" style="text-align: right;">Valor Unit. (R$)</th>
+                        <th class="col-fotos" style="text-align: center;">Fotos do Ambiente</th>
                         <th class="col-actions">Ação</th>
                     </tr>
                 </thead>
@@ -753,6 +881,15 @@
             <span>Consultor Técnico - Móveis Cristal</span>
         </div>
 
+        <!-- Seção da Galeria de Fotos Anexo no PDF -->
+        <div id="secaoGaleriaFotosPrint" class="galeria-pdf-container">
+            <div class="galeria-pdf-header">
+                <h2>ANEXO: GALERIA E PROJETOS DOS AMBIENTES</h2>
+                <p>Fotos e referências visuais vinculadas ao projeto comercial</p>
+            </div>
+            <div id="galeriaConteudoPDF"></div>
+        </div>
+
         <div class="action-panel">
             <button type="button" class="btn-main btn-whatsapp-simple" onclick="enviarWhatsApp(false)">
                 💬 Enviar WhatsApp (Texto Manual)
@@ -858,10 +995,18 @@
     function adicionarLinhaItem() {
         const tbody = document.getElementById('corpoTabela');
         const tr = document.createElement('tr');
+        tr.fotosArray = [];
         tr.innerHTML = `
             <td class="col-desc"><input type="text" class="table-input item-desc" placeholder="Ex: Cozinha sob medida"></td>
             <td class="col-qtd" style="text-align: center;"><input type="number" class="table-input item-qtd" value="1" min="1" style="text-align: center;" oninput="calcularTotal()"></td>
             <td class="col-valor" style="text-align: right;"><input type="text" class="table-input item-valor moeda-input" value="0,00" style="text-align: right;" oninput="calcularTotal()"></td>
+            <td class="col-fotos" style="text-align: center;">
+                <label class="btn-upload-foto">
+                    📸 Add Fotos
+                    <input type="file" accept="image/*" multiple style="display:none;" onchange="processarFotosLinha(this)">
+                </label>
+                <div class="fotos-status-container"></div>
+            </td>
             <td class="col-actions"><button type="button" class="btn-remove" onclick="removerLinhaItem(this)">✕</button></td>
         `;
         tbody.appendChild(tr);
@@ -871,6 +1016,82 @@
     function removerLinhaItem(botao) {
         botao.closest('tr').remove();
         calcularTotal();
+    }
+
+    /* COMPACTAÇÃO E MANIPULAÇÃO DE FOTOS DO AMBIENTE */
+    function compressImage(file, maxWidth = 1000, maxHeight = 1000, quality = 0.75) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function processarFotosLinha(input) {
+        const files = Array.from(input.files);
+        if(!files || files.length === 0) return;
+
+        const tr = input.closest('tr');
+        const containerStatus = tr.querySelector('.fotos-status-container');
+        containerStatus.innerHTML = `<span style="font-size: 11px; color: #7c3aed;">⏳ Processando...</span>`;
+
+        if(!tr.fotosArray) tr.fotosArray = [];
+
+        for (const file of files) {
+            try {
+                const compressedBase64 = await compressImage(file);
+                tr.fotosArray.push(compressedBase64);
+            } catch (err) {
+                console.error("Erro ao compactar imagem:", err);
+            }
+        }
+
+        atualizarStatusFotosLinha(tr);
+        input.value = ""; 
+    }
+
+    function atualizarStatusFotosLinha(tr) {
+        const containerStatus = tr.querySelector('.fotos-status-container');
+        const total = tr.fotosArray ? tr.fotosArray.length : 0;
+        
+        if (total > 0) {
+            containerStatus.innerHTML = `
+                <span class="foto-badge-count">📷 ${total} foto(s)</span>
+                <button type="button" class="btn-limpar-fotos" onclick="limparFotosLinha(this)">Limpar</button>
+            `;
+        } else {
+            containerStatus.innerHTML = '';
+        }
+    }
+
+    function limparFotosLinha(btn) {
+        const tr = btn.closest('tr');
+        tr.fotosArray = [];
+        atualizarStatusFotosLinha(tr);
     }
 
     function alternarCamposFrete() {
@@ -950,12 +1171,10 @@
             const qtdParc = parseInt(document.getElementById('pagQtdParcInput').value);
             const regraJuros = document.getElementById('pagRegraJuros').value;
             
-            // AJUSTE 1: Entrada calculada rigorosamente em cima do total bruto dos móveis
             const vlrEntrada = totalBruto * (pctEntrada / 100);
             let vlrSaldoOriginal = totalBruto - vlrEntrada;
             let vlrSaldoComJuros = vlrSaldoOriginal;
             
-            // AJUSTE 2: Nova fórmula usando fator complementar para repasse líquido exato da taxa
             if (regraJuros === 'com' && TABELA_TAXAS[qtdParc] !== undefined) {
                 vlrSaldoComJuros = vlrSaldoOriginal / (1 - TABELA_TAXAS[qtdParc]);
                 totalFinal = vlrEntrada + vlrSaldoComJuros;
@@ -1181,6 +1400,44 @@ Anotações do Projetista: ${anotacoesManuais}`;
         window.open(`https://api.whatsapp.com/send?phone=55${telefone}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
+    function atualizarGaleriaPDF() {
+        const containerGaleria = document.getElementById('galeriaConteudoPDF');
+        containerGaleria.innerHTML = "";
+        let temFotos = false;
+
+        document.querySelectorAll('#corpoTabela tr').forEach(linha => {
+            const desc = linha.querySelector('.item-desc').value.trim() || "Ambiente sem Nome";
+            const fotos = linha.fotosArray || [];
+
+            if (fotos.length > 0) {
+                temFotos = true;
+                const blocoAmbiente = document.createElement('div');
+                blocoAmbiente.className = 'galeria-bloco-ambiente';
+
+                const titulo = document.createElement('div');
+                titulo.className = 'galeria-titulo-ambiente';
+                titulo.innerText = `📍 ${desc}`;
+                blocoAmbiente.appendChild(titulo);
+
+                const grid = document.createElement('div');
+                grid.className = 'galeria-grid';
+
+                fotos.forEach(src => {
+                    const card = document.createElement('div');
+                    card.className = 'galeria-item-card';
+                    card.innerHTML = `<img src="${src}" alt="${desc}">`;
+                    grid.appendChild(card);
+                });
+
+                blocoAmbiente.appendChild(grid);
+                containerGaleria.appendChild(blocoAmbiente);
+            }
+        });
+
+        const secaoGaleria = document.getElementById('secaoGaleriaFotosPrint');
+        secaoGaleria.style.display = temFotos ? 'block' : 'none';
+    }
+
     function marcarClassesImpressao() {
         document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected-print'));
         const freteMarcado = document.querySelector('input[name="tipoFrete"]:checked');
@@ -1215,6 +1472,7 @@ Anotações do Projetista: ${anotacoesManuais}`;
             containerIAPrint.style.display = 'none';
         }
         
+        atualizarGaleriaPDF();
         ajustarAlturaTextareas();
     }
 
@@ -1295,6 +1553,8 @@ Anotações do Projetista: ${anotacoesManuais}`;
             alternarCamposPagamento();
             document.getElementById('containerAreaManualPrint').style.display = 'none';
             document.getElementById('containerAreaIA').style.display = 'block';
+            document.getElementById('secaoGaleriaFotosPrint').style.display = 'none';
+            document.getElementById('galeriaConteudoPDF').innerHTML = '';
             document.body.classList.remove('modo-impressao-recibo');
         }
     }
